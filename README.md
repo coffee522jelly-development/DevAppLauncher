@@ -1,4 +1,4 @@
-# Tauri Workspace Project Launcher
+# DevAppLauncher
 
 A lightweight desktop application built with Tauri v2, Svelte 5, and DaisyUI. It simplifies your developer workflow by automatically detecting Node.js projects within your workspaces and allowing you to execute scripts via a clean GUI.
 

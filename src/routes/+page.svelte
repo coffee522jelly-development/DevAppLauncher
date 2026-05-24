@@ -73,7 +73,7 @@
   <main class="h-screen w-screen flex bg-base-100 overflow-hidden text-base-content">
     {#if workspaceRoots.length === 0}
       <div class="flex-1 flex flex-col items-center justify-center space-y-6 text-center px-4">
-        <h1 class="text-4xl font-extrabold tracking-tight">Tauri Workspace Launcher</h1>
+        <h1 class="text-4xl font-extrabold tracking-tight">DevAppLauncher</h1>
         <button class="btn btn-primary btn-lg" on:click={handleSelectWorkspace}>
           {$_('selectWorkspace')}
         </button>

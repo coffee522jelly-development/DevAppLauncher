@@ -1,7 +1,7 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
   import type { Project } from '../types';
-  import { runCommand, stopCommand, runningProcesses, runningCommands, logs } from '../stores/commands';
+  import { runCommand, stopCommand, runningProcesses, runningCommands, logs, appendLog } from '../stores/commands';
   import LogViewer from './LogViewer.svelte';
 
   export let project: Project;
@@ -26,11 +26,6 @@
     const baseUrl = gitServerUrl.replace(/\/$/, '');
     const repoUrl = `${baseUrl}/${project.name}.git`;
 
-    // Check if .git directory exists to decide whether to clone or not
-    // For MVP, we'll try to initialize and add remote, or just run clone
-    // Since we are IN the project directory, git clone repoUrl . is only possible if directory is empty.
-    // Let's do a sequence: git init, git remote add origin, git fetch, git checkout
-
     appendLog(project.id, {
       type: 'info',
       content: `Attempting to link with ${repoUrl}...`,
@@ -38,32 +33,34 @@
     });
 
     await runCommand(project.id, project.path, 'git', ['init']);
-    await runCommand(project.id, project.path, 'git', ['remote', 'add', 'origin', repoUrl]);
-    await runCommand(project.id, project.path, 'git', ['fetch']);
+    setTimeout(async () => {
+      await runCommand(project.id, project.path, 'git', ['remote', 'add', 'origin', repoUrl]);
+      setTimeout(async () => {
+        await runCommand(project.id, project.path, 'git', ['fetch']);
+      }, 500);
+    }, 500);
   }
 
   function handleGitPush() {
     runCommand(project.id, project.path, 'git', ['push', 'origin', 'HEAD']);
   }
-
-  import { appendLog } from '../stores/commands';
 </script>
 
-<div class="flex flex-col h-full p-6 space-y-6 overflow-hidden bg-base-100">
+<div class="flex flex-col h-full p-6 space-y-6 overflow-hidden bg-base-100 text-base-content">
   <div class="flex flex-col border-b border-base-300 pb-4">
     <div class="flex items-center justify-between">
       <div class="flex items-center space-x-3">
-        <h1 class="text-2xl font-bold text-base-content">{project.name}</h1>
+        <h1 class="text-2xl font-bold">{project.name}</h1>
         <div class="badge badge-primary badge-outline">{project.packageManager}</div>
       </div>
     </div>
-    <div class="text-xs text-base-content/50 mt-1 font-mono bg-base-200 p-1 rounded inline-block truncate">
+    <div class="text-xs opacity-50 mt-1 font-mono bg-base-200 p-1 rounded inline-block truncate">
       {project.path}
     </div>
   </div>
 
   <div class="space-y-4 flex-none">
-    <div class="flex flex-wrap gap-2 items-center text-base-content">
+    <div class="flex flex-wrap gap-2 items-center">
       <div class="join">
         <button
           class="btn btn-primary btn-sm join-item"
