@@ -12,6 +12,7 @@
   $: isRunning = !!$runningProcesses[project.id];
   $: runningCmd = $runningCommands[project.id];
   $: projectLogs = $logs[project.id] || [];
+  $: hasScripts = Object.keys(project.scripts).length > 0;
 
   function handleInstall() {
     const cmd = project.packageManager;
@@ -36,7 +37,6 @@
         url.password = gitToken;
         return url.toString();
       } catch (e) {
-        // Fallback for non-standard URLs
         if (repoUrl.startsWith('https://')) {
           return repoUrl.replace('https://', `https://${gitUsername}:${gitToken}@`);
         }
@@ -51,28 +51,29 @@
 
     appendLog(project.id, {
       type: 'info',
-      content: `Attempting to link with ${repoUrl.replace(gitToken, '****')}...`,
+      content: `Linking with ${repoUrl.split('@').pop()?.replace(gitToken, '****')}...`,
       timestamp: new Date().toLocaleTimeString(),
     });
 
-    await runCommand(project.id, project.path, 'git', ['init']);
+    const mask = [gitToken];
+
+    await runCommand(project.id, project.path, 'git', ['init'], mask);
     setTimeout(async () => {
-      // Use authenticated URL for remote
-      await runCommand(project.id, project.path, 'git', ['remote', 'remove', 'origin']).catch(() => {});
-      await runCommand(project.id, project.path, 'git', ['remote', 'add', 'origin', repoUrl]);
+      await runCommand(project.id, project.path, 'git', ['remote', 'remove', 'origin'], mask).catch(() => {});
+      await runCommand(project.id, project.path, 'git', ['remote', 'add', 'origin', repoUrl], mask);
       setTimeout(async () => {
-        await runCommand(project.id, project.path, 'git', ['fetch', 'origin']);
+        await runCommand(project.id, project.path, 'git', ['fetch', 'origin'], mask);
       }, 500);
     }, 500);
   }
 
   async function handleGitPush() {
     const repoUrl = getAuthenticatedUrl();
+    const mask = [gitToken];
     if (repoUrl) {
-      // Update remote URL just in case credentials changed
-      await runCommand(project.id, project.path, 'git', ['remote', 'set-url', 'origin', repoUrl]);
+      await runCommand(project.id, project.path, 'git', ['remote', 'set-url', 'origin', repoUrl], mask);
     }
-    runCommand(project.id, project.path, 'git', ['push', 'origin', 'HEAD']);
+    runCommand(project.id, project.path, 'git', ['push', 'origin', 'HEAD'], mask);
   }
 </script>
 
@@ -91,30 +92,33 @@
 
   <div class="space-y-4 flex-none">
     <div class="flex flex-wrap gap-2 items-center">
-      <div class="join">
-        <button
-          class="btn btn-primary btn-sm join-item"
-          disabled={isRunning}
-          on:click={handleInstall}
-        >
-          📥 {$_('install')}
-        </button>
-      </div>
-
-      <div class="divider divider-horizontal mx-0"></div>
-
-      <div class="join">
-        {#each Object.keys(project.scripts) as scriptName}
+      {#if hasScripts || project.packageManager}
+        <div class="join">
           <button
-            class="btn btn-outline btn-sm btn-secondary join-item"
+            class="btn btn-primary btn-sm join-item"
             disabled={isRunning}
-            title={project.scripts[scriptName]}
-            on:click={() => handleRunScript(scriptName)}
+            on:click={handleInstall}
           >
-            {scriptName}
+            📥 {$_('install')}
           </button>
-        {/each}
-      </div>
+        </div>
+      {/if}
+
+      {#if hasScripts}
+        <div class="divider divider-horizontal mx-0"></div>
+        <div class="join">
+          {#each Object.keys(project.scripts) as scriptName}
+            <button
+              class="btn btn-outline btn-sm btn-secondary join-item"
+              disabled={isRunning}
+              title={project.scripts[scriptName]}
+              on:click={() => handleRunScript(scriptName)}
+            >
+              {scriptName}
+            </button>
+          {/each}
+        </div>
+      {/if}
 
       <div class="divider divider-horizontal mx-0"></div>
 
@@ -140,10 +144,10 @@
 
   <div class="flex-1 flex flex-col min-h-0">
     {#if isRunning}
-      <div class="alert alert-info shadow-sm flex justify-between items-center py-2 px-4 mb-4 rounded-lg border-l-4">
+      <div class="alert alert-info shadow-sm flex justify-between items-center py-2 px-4 mb-4 rounded-lg border-l-4 border-info">
         <div class="flex items-center space-x-3">
           <span class="loading loading-spinner loading-xs text-info"></span>
-          <div class="flex flex-col">
+          <div class="flex flex-col text-info-content">
             <span class="text-xs font-bold uppercase opacity-70">{$_('running')}</span>
             <code class="text-xs">{runningCmd}</code>
           </div>

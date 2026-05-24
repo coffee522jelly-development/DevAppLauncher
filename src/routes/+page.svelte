@@ -46,11 +46,18 @@
     }
   }
 
+  // Persistence effect - decoupled from heavy scanning logic
   $effect(() => {
     localStorage.setItem('workspaceRoots', JSON.stringify(workspaceRoots));
     localStorage.setItem('gitServerUrl', gitServerUrl);
     localStorage.setItem('gitUsername', gitUsername);
     localStorage.setItem('gitToken', gitToken);
+  });
+
+  // Scan effect - only runs when workspaceRoots change
+  $effect(() => {
+    // Access workspaceRoots to establish dependency
+    const _roots = workspaceRoots;
     handleRefresh();
   });
 
@@ -71,14 +78,15 @@
 
 {#if $isLoading}
   <div class="h-screen w-screen flex items-center justify-center bg-base-100">
-    <span class="loading loading-spinner loading-lg"></span>
+    <span class="loading loading-spinner loading-lg text-primary"></span>
   </div>
 {:else}
   <main class="h-screen w-screen flex bg-base-100 overflow-hidden text-base-content">
     {#if workspaceRoots.length === 0}
       <div class="flex-1 flex flex-col items-center justify-center space-y-6 text-center px-4">
-        <h1 class="text-4xl font-extrabold tracking-tight">DevAppLauncher</h1>
-        <button class="btn btn-primary btn-lg" on:click={handleSelectWorkspace}>
+        <h1 class="text-5xl font-black tracking-tighter bg-gradient-to-br from-primary to-secondary bg-clip-text text-transparent">DevAppLauncher</h1>
+        <p class="text-base-content/60 max-w-sm">Manage your projects and workspaces from a single desktop GUI.</p>
+        <button class="btn btn-primary btn-lg shadow-xl" on:click={handleSelectWorkspace}>
           {$_('selectWorkspace')}
         </button>
       </div>
@@ -100,7 +108,7 @@
             {gitToken}
           />
         {:else}
-          <div class="h-full flex items-center justify-center text-base-content/50 italic">
+          <div class="h-full flex items-center justify-center text-base-content/30 italic">
             {#if projects.length > 0}
               {$_('selectAProject')}
             {:else if isScanning}

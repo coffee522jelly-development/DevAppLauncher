@@ -3,7 +3,6 @@ import { join } from '@tauri-apps/api/path';
 import type { Project, PackageManager } from '../types';
 
 const IGNORED_DIRS = ['node_modules', 'dist', 'build', '.next', '.nuxt', '.git', 'coverage', 'target'];
-const MAX_DEPTH = 3;
 
 async function detectPackageManager(projectPath: string): Promise<PackageManager> {
   if (await exists(await join(projectPath, 'pnpm-lock.yaml'))) return 'pnpm';
@@ -12,43 +11,49 @@ async function detectPackageManager(projectPath: string): Promise<PackageManager
   return 'npm';
 }
 
-export async function scanWorkspace(rootPath: string, depth = 0): Promise<Project[]> {
-  if (depth > MAX_DEPTH) return [];
+async function createProjectFromPath(path: string): Promise<Project> {
+  const folderName = path.split(/[/\\]/).filter(Boolean).pop() || 'unnamed';
+  let scripts: Record<string, string> = {};
+  let packageManager: PackageManager = 'npm';
 
-  const projects: Project[] = [];
   try {
-    const entries = await readDir(rootPath);
-
-    // Check if current directory is a project
-    const packageJsonPath = await join(rootPath, 'package.json');
+    const packageJsonPath = await join(path, 'package.json');
     if (await exists(packageJsonPath)) {
-      try {
-        const content = await readFile(packageJsonPath);
-        const pkg = JSON.parse(new TextDecoder().decode(content));
-
-        const project: Project = {
-          id: rootPath,
-          name: pkg.name || rootPath.split(/[/\\]/).pop() || 'unnamed',
-          path: rootPath,
-          packageManager: await detectPackageManager(rootPath),
-          scripts: pkg.scripts || {},
-        };
-        projects.push(project);
-      } catch (e) {
-        console.error(`Failed to parse package.json at ${rootPath}`, e);
-      }
+      const content = await readFile(packageJsonPath);
+      const pkg = JSON.parse(new TextDecoder().decode(content));
+      scripts = pkg.scripts || {};
+      packageManager = await detectPackageManager(path);
     }
+  } catch (e) {
+    // Ignore errors, return project with empty scripts
+  }
 
-    // Recursively scan subdirectories
+  return {
+    id: path,
+    name: folderName, // Prioritize folder name
+    path: path,
+    packageManager,
+    scripts,
+  };
+}
+
+export async function scanWorkspace(rootPath: string): Promise<Project[]> {
+  const projects: Project[] = [];
+
+  try {
+    // 1. Treat the root path itself as a project
+    projects.push(await createProjectFromPath(rootPath));
+
+    // 2. Treat immediate subdirectories as projects
+    const entries = await readDir(rootPath);
     for (const entry of entries) {
       if (entry.isDirectory && !IGNORED_DIRS.includes(entry.name)) {
         const subPath = await join(rootPath, entry.name);
-        const subProjects = await scanWorkspace(subPath, depth + 1);
-        projects.push(...subProjects);
+        projects.push(await createProjectFromPath(subPath));
       }
     }
   } catch (e) {
-    console.error(`Failed to scan directory ${rootPath}`, e);
+    console.error(`Failed to scan workspace ${rootPath}`, e);
   }
 
   return projects;

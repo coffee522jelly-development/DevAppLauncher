@@ -16,25 +16,33 @@ export function appendLog(projectId: string, log: CommandLog) {
   }));
 }
 
-export async function runCommand(projectId: string, cwd: string, program: string, args: string[]) {
+export async function runCommand(projectId: string, cwd: string, program: string, args: string[], mask: string[] = []) {
   const t = get(_);
 
   // Handle Windows command extensions
   let actualProgram = program;
   const isWindows = type() === 'windows';
   if (isWindows) {
-    if (['npm', 'pnpm', 'yarn'].includes(program)) {
-      actualProgram = `${program}.cmd`;
+    if (['npm', 'pnpm', 'yarn', 'git'].includes(program)) {
+      actualProgram = program === 'git' ? 'git' : `${program}.cmd`;
     } else if (program === 'bun') {
       actualProgram = `${program}.exe`;
     }
   }
 
-  const fullCommand = `${actualProgram} ${args.join(' ')}`;
+  let fullCommand = `${actualProgram} ${args.join(' ')}`;
+  let displayCommand = fullCommand;
+
+  // Mask sensitive information in logs
+  for (const sensitive of mask) {
+    if (sensitive) {
+      displayCommand = displayCommand.split(sensitive).join('****');
+    }
+  }
 
   appendLog(projectId, {
     type: 'info',
-    content: `$ ${fullCommand}`,
+    content: `$ ${displayCommand}`,
     timestamp: new Date().toLocaleTimeString(),
   });
 
@@ -86,7 +94,7 @@ export async function runCommand(projectId: string, cwd: string, program: string
     const child = await command.spawn();
 
     runningProcesses.update((prev) => ({ ...prev, [projectId]: child }));
-    runningCommands.update((prev) => ({ ...prev, [projectId]: fullCommand }));
+    runningCommands.update((prev) => ({ ...prev, [projectId]: displayCommand }));
   } catch (error) {
     appendLog(projectId, {
       type: 'stderr',
