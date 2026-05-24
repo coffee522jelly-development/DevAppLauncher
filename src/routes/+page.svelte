@@ -10,6 +10,7 @@
   import "../i18n";
 
   let workspaceRoots: string[] = $state(JSON.parse(localStorage.getItem('workspaceRoots') || '[]'));
+  let gitServerUrl: string = $state(localStorage.getItem('gitServerUrl') || '');
   let projects: Project[] = $state([]);
   let selectedProjectId: string | undefined = $state();
   let showSettings = $state(false);
@@ -45,6 +46,7 @@
 
   $effect(() => {
     localStorage.setItem('workspaceRoots', JSON.stringify(workspaceRoots));
+    localStorage.setItem('gitServerUrl', gitServerUrl);
     handleRefresh();
   });
 
@@ -87,7 +89,7 @@
       />
       <div class="flex-1 overflow-hidden">
         {#if selectedProject}
-          <ProjectDetails project={selectedProject} />
+          <ProjectDetails project={selectedProject} {gitServerUrl} />
         {:else}
           <div class="h-full flex items-center justify-center text-base-content/50 italic">
             {#if projects.length > 0}
@@ -105,7 +107,9 @@
     {#if showSettings}
       <Settings
         {workspaceRoots}
+        {gitServerUrl}
         onWorkspaceRootsChange={(roots) => workspaceRoots = roots}
+        onGitServerUrlChange={(url) => gitServerUrl = url}
         onClose={() => showSettings = false}
       />
     {/if}

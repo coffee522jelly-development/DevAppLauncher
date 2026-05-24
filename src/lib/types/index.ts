@@ -19,6 +19,7 @@ export interface AppState {
   projects: Project[];
   selectedProjectId?: string;
   language: string;
+  gitServerUrl: string;
 }
 
 export interface CommandLog {

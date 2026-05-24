@@ -11,5 +11,9 @@
   "noProjectsFound": "No Node.js projects found.",
   "selectAProject": "Select a project.",
   "exitCode": "Exited with code",
-  "errorParsingPackageJson": "Parse error:"
+  "errorParsingPackageJson": "Parse error:",
+  "gitServerUrl": "Git Server URL",
+  "gitClone": "Clone",
+  "gitPush": "Push",
+  "gitServerExample": "Example: https://github.com/my-org"
 }

@@ -3,7 +3,9 @@
   import { open } from '@tauri-apps/plugin-dialog';
 
   export let workspaceRoots: string[] = [];
+  export let gitServerUrl: string = '';
   export let onWorkspaceRootsChange: (roots: string[]) => void;
+  export let onGitServerUrlChange: (url: string) => void;
   export let onClose: () => void;
 
   async function handleAddWorkspace() {
@@ -40,7 +42,7 @@
         <label class="label">
           <span class="label-text font-black uppercase text-xs opacity-60">{$_('workspaceRoot')}</span>
         </label>
-        <div class="space-y-2 max-h-48 overflow-y-auto p-1">
+        <div class="space-y-2 max-h-48 overflow-y-auto p-1 text-base-content">
           {#if workspaceRoots.length === 0}
             <div class="text-center py-4 border-2 border-dashed border-base-300 rounded-lg text-sm opacity-50 italic">
               No workspaces added
@@ -64,10 +66,28 @@
 
       <div class="form-control">
         <label class="label">
+          <span class="label-text font-black uppercase text-xs opacity-60">{$_('gitServerUrl')}</span>
+        </label>
+        <input
+          type="text"
+          placeholder="https://github.com/username"
+          class="input input-bordered input-sm w-full font-mono text-base-content"
+          value={gitServerUrl}
+          on:input={(e) => onGitServerUrlChange(e.currentTarget.value)}
+        />
+        <label class="label">
+          <span class="label-text-alt opacity-50">{$_('gitServerExample')}</span>
+        </label>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="form-control">
+        <label class="label">
           <span class="label-text font-black uppercase text-xs opacity-60">{$_('language')}</span>
         </label>
         <select
-          class="select select-bordered select-sm w-full font-bold focus:select-primary"
+          class="select select-bordered select-sm w-full font-bold focus:select-primary text-base-content"
           value={$locale}
           on:change={(e) => handleLanguageChange(e.currentTarget.value)}
         >

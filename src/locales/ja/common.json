@@ -11,5 +11,9 @@
   "noProjectsFound": "プロジェクトが見つかりませんでした。",
   "selectAProject": "プロジェクトを選択してください。",
   "exitCode": "終了コード:",
-  "errorParsingPackageJson": "解析失敗:"
+  "errorParsingPackageJson": "解析失敗:",
+  "gitServerUrl": "GitサーバーのURL",
+  "gitClone": "クローン",
+  "gitPush": "プッシュ",
+  "gitServerExample": "例: https://github.com/my-org"
 }

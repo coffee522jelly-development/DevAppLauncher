@@ -5,6 +5,7 @@
   import LogViewer from './LogViewer.svelte';
 
   export let project: Project;
+  export let gitServerUrl: string = '';
 
   $: isRunning = !!$runningProcesses[project.id];
   $: runningCmd = $runningCommands[project.id];
@@ -19,6 +20,33 @@
   function handleRunScript(scriptName: string) {
     runCommand(project.id, project.path, project.packageManager, ['run', scriptName]);
   }
+
+  async function handleGitClone() {
+    if (!gitServerUrl) return;
+    const baseUrl = gitServerUrl.replace(/\/$/, '');
+    const repoUrl = `${baseUrl}/${project.name}.git`;
+
+    // Check if .git directory exists to decide whether to clone or not
+    // For MVP, we'll try to initialize and add remote, or just run clone
+    // Since we are IN the project directory, git clone repoUrl . is only possible if directory is empty.
+    // Let's do a sequence: git init, git remote add origin, git fetch, git checkout
+
+    appendLog(project.id, {
+      type: 'info',
+      content: `Attempting to link with ${repoUrl}...`,
+      timestamp: new Date().toLocaleTimeString(),
+    });
+
+    await runCommand(project.id, project.path, 'git', ['init']);
+    await runCommand(project.id, project.path, 'git', ['remote', 'add', 'origin', repoUrl]);
+    await runCommand(project.id, project.path, 'git', ['fetch']);
+  }
+
+  function handleGitPush() {
+    runCommand(project.id, project.path, 'git', ['push', 'origin', 'HEAD']);
+  }
+
+  import { appendLog } from '../stores/commands';
 </script>
 
 <div class="flex flex-col h-full p-6 space-y-6 overflow-hidden bg-base-100">
@@ -35,27 +63,51 @@
   </div>
 
   <div class="space-y-4 flex-none">
-    <div class="flex flex-wrap gap-2">
-      <button
-        class="btn btn-primary btn-sm"
-        disabled={isRunning}
-        on:click={handleInstall}
-      >
-        <span class="icon">📥</span> {$_('install')}
-      </button>
+    <div class="flex flex-wrap gap-2 items-center text-base-content">
+      <div class="join">
+        <button
+          class="btn btn-primary btn-sm join-item"
+          disabled={isRunning}
+          on:click={handleInstall}
+        >
+          📥 {$_('install')}
+        </button>
+      </div>
 
       <div class="divider divider-horizontal mx-0"></div>
 
-      {#each Object.keys(project.scripts) as scriptName}
+      <div class="join">
+        {#each Object.keys(project.scripts) as scriptName}
+          <button
+            class="btn btn-outline btn-sm btn-secondary join-item"
+            disabled={isRunning}
+            title={project.scripts[scriptName]}
+            on:click={() => handleRunScript(scriptName)}
+          >
+            {scriptName}
+          </button>
+        {/each}
+      </div>
+
+      <div class="divider divider-horizontal mx-0"></div>
+
+      <div class="join">
         <button
-          class="btn btn-outline btn-sm btn-secondary"
-          disabled={isRunning}
-          title={project.scripts[scriptName]}
-          on:click={() => handleRunScript(scriptName)}
+          class="btn btn-sm btn-accent join-item"
+          disabled={isRunning || !gitServerUrl}
+          on:click={handleGitClone}
+          title={gitServerUrl ? `Link with ${gitServerUrl}` : 'Set Git Server URL in settings'}
         >
-          {scriptName}
+          🐙 {$_('gitClone')}
         </button>
-      {/each}
+        <button
+          class="btn btn-sm btn-accent join-item"
+          disabled={isRunning}
+          on:click={handleGitPush}
+        >
+          ⬆️ {$_('gitPush')}
+        </button>
+      </div>
     </div>
   </div>
 
