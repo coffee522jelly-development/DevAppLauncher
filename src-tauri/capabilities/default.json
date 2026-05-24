@@ -10,7 +10,7 @@
     "fs:default",
     "shell:default",
     {
-      "identifier": "shell:allow-execute",
+      "identifier": "shell:allow-spawn",
       "allow": [
         {
           "args": true,

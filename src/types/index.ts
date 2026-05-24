@@ -15,7 +15,7 @@ export interface RunningProcess {
 }
 
 export interface AppState {
-  workspaceRoot: string;
+  workspaceRoots: string[];
   projects: Project[];
   selectedProjectId?: string;
   language: string;

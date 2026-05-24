@@ -11,8 +11,9 @@ import Settings from "./components/Settings";
 
 function App() {
   const { t } = useTranslation();
-  const [workspaceRoot, setWorkspaceRoot] = useState<string>(() => {
-    return localStorage.getItem("workspaceRoot") || "";
+  const [workspaceRoots, setWorkspaceRoots] = useState<string[]>(() => {
+    const saved = localStorage.getItem("workspaceRoots");
+    return saved ? JSON.parse(saved) : [];
   });
   const [projects, setProjects] = useState<Project[]>([]);
   const [selectedProjectId, setSelectedProjectId] = useState<string | undefined>();
@@ -28,27 +29,39 @@ function App() {
   } = useCommandExecutor();
 
   const handleRefresh = useCallback(async () => {
-    if (!workspaceRoot) return;
+    if (workspaceRoots.length === 0) {
+      setProjects([]);
+      return;
+    }
     setIsScanning(true);
     try {
-      const detectedProjects = await scanWorkspace(workspaceRoot);
-      setProjects(detectedProjects);
-      if (detectedProjects.length > 0 && !selectedProjectId) {
-        setSelectedProjectId(detectedProjects[0].id);
+      const allDetectedProjects: Project[] = [];
+      for (const root of workspaceRoots) {
+        const detected = await scanWorkspace(root);
+        allDetectedProjects.push(...detected);
+      }
+
+      // Filter out duplicate paths (just in case)
+      const uniqueProjects = allDetectedProjects.filter(
+        (project, index, self) =>
+          index === self.findIndex((p) => p.id === project.id)
+      );
+
+      setProjects(uniqueProjects);
+      if (uniqueProjects.length > 0 && !selectedProjectId) {
+        setSelectedProjectId(uniqueProjects[0].id);
       }
     } catch (error) {
-      console.error("Failed to scan workspace", error);
+      console.error("Failed to scan workspaces", error);
     } finally {
       setIsScanning(false);
     }
-  }, [workspaceRoot, selectedProjectId]);
+  }, [workspaceRoots, selectedProjectId]);
 
   useEffect(() => {
-    if (workspaceRoot) {
-      handleRefresh();
-      localStorage.setItem("workspaceRoot", workspaceRoot);
-    }
-  }, [workspaceRoot, handleRefresh]);
+    handleRefresh();
+    localStorage.setItem("workspaceRoots", JSON.stringify(workspaceRoots));
+  }, [workspaceRoots, handleRefresh]);
 
   const handleSelectWorkspace = async () => {
     const selected = await open({
@@ -56,13 +69,15 @@ function App() {
       multiple: false,
     });
     if (selected && typeof selected === "string") {
-      setWorkspaceRoot(selected);
+      if (!workspaceRoots.includes(selected)) {
+        setWorkspaceRoots((prev) => [...prev, selected]);
+      }
     }
   };
 
   const selectedProject = projects.find((p) => p.id === selectedProjectId);
 
-  if (!workspaceRoot) {
+  if (workspaceRoots.length === 0) {
     return (
       <div className="empty-state">
         <h1>Tauri Workspace Launcher</h1>
@@ -109,8 +124,8 @@ function App() {
 
       {showSettings && (
         <Settings
-          workspaceRoot={workspaceRoot}
-          onWorkspaceRootChange={setWorkspaceRoot}
+          workspaceRoots={workspaceRoots}
+          onWorkspaceRootsChange={setWorkspaceRoots}
           onClose={() => setShowSettings(false)}
         />
       )}

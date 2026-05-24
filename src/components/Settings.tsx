@@ -3,26 +3,32 @@ import { useTranslation } from 'react-i18next';
 import { open } from '@tauri-apps/plugin-dialog';
 
 interface SettingsProps {
-  workspaceRoot: string;
-  onWorkspaceRootChange: (path: string) => void;
+  workspaceRoots: string[];
+  onWorkspaceRootsChange: (roots: string[]) => void;
   onClose: () => void;
 }
 
 const Settings: React.FC<SettingsProps> = ({
-  workspaceRoot,
-  onWorkspaceRootChange,
+  workspaceRoots,
+  onWorkspaceRootsChange,
   onClose,
 }) => {
   const { t, i18n } = useTranslation();
 
-  const handleSelectWorkspace = async () => {
+  const handleAddWorkspace = async () => {
     const selected = await open({
       directory: true,
       multiple: false,
     });
     if (selected && typeof selected === 'string') {
-      onWorkspaceRootChange(selected);
+      if (!workspaceRoots.includes(selected)) {
+        onWorkspaceRootsChange([...workspaceRoots, selected]);
+      }
     }
+  };
+
+  const handleRemoveWorkspace = (path: string) => {
+    onWorkspaceRootsChange(workspaceRoots.filter((root) => root !== path));
   };
 
   const handleLanguageChange = (lang: string) => {
@@ -39,9 +45,16 @@ const Settings: React.FC<SettingsProps> = ({
         <div className="settings-body">
           <div className="setting-group">
             <label>{t('workspaceRoot')}</label>
-            <div className="workspace-input">
-              <input type="text" value={workspaceRoot} readOnly />
-              <button onClick={handleSelectWorkspace}>{t('selectWorkspace')}</button>
+            <div className="workspace-list">
+              {workspaceRoots.map((root) => (
+                <div key={root} className="workspace-item">
+                  <span className="workspace-path" title={root}>{root}</span>
+                  <button className="remove-btn" onClick={() => handleRemoveWorkspace(root)}>✕</button>
+                </div>
+              ))}
+              <button className="add-workspace-btn" onClick={handleAddWorkspace}>
+                + {t('selectWorkspace')}
+              </button>
             </div>
           </div>
           <div className="setting-group">

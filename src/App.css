@@ -267,8 +267,37 @@ body {
 .setting-group { margin-bottom: 20px; }
 .setting-group label { display: block; margin-bottom: 8px; font-weight: bold; }
 
-.workspace-input { display: flex; gap: 8px; }
-.workspace-input input { flex: 1; background: #333; border: 1px solid #444; color: white; padding: 8px; border-radius: 4px; }
-.workspace-input button { background: var(--accent-color); color: white; border: none; padding: 0 12px; border-radius: 4px; cursor: pointer; }
+.workspace-list { display: flex; flex-direction: column; gap: 8px; }
+.workspace-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #333;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 13px;
+}
+.workspace-path {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+}
+.remove-btn {
+  background: none;
+  border: none;
+  color: #888;
+  cursor: pointer;
+  padding: 0 4px;
+}
+.remove-btn:hover { color: var(--danger-color); }
+.add-workspace-btn {
+  background: var(--accent-color);
+  color: white;
+  border: none;
+  padding: 8px;
+  border-radius: 4px;
+  cursor: pointer;
+}
 
 .setting-group select { width: 100%; background: #333; border: 1px solid #444; color: white; padding: 8px; border-radius: 4px; }
