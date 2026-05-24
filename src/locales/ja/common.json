@@ -1,0 +1,15 @@
+{
+  "projects": "プロジェクト",
+  "refreshProjects": "プロジェクトを更新",
+  "settings": "設定",
+  "workspaceRoot": "ワークスペースのルート",
+  "selectWorkspace": "ワークスペースを選択",
+  "language": "言語",
+  "install": "インストール",
+  "running": "実行中...",
+  "stop": "停止",
+  "noProjectsFound": "選択されたワークスペースにNode.jsプロジェクトが見つかりませんでした。",
+  "selectAProject": "詳細を表示するプロジェクトを選択してください。",
+  "exitCode": "プロセスが終了しました。終了コード:",
+  "errorParsingPackageJson": "package.jsonの解析に失敗しました:"
+}

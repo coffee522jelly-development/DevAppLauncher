@@ -1,0 +1,38 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "Capability for the main window",
+  "windows": ["main"],
+  "permissions": [
+    "core:default",
+    "opener:default",
+    "dialog:default",
+    "fs:default",
+    "shell:default",
+    {
+      "identifier": "shell:allow-execute",
+      "allow": [
+        {
+          "args": true,
+          "cmd": "npm",
+          "name": "npm"
+        },
+        {
+          "args": true,
+          "cmd": "pnpm",
+          "name": "pnpm"
+        },
+        {
+          "args": true,
+          "cmd": "yarn",
+          "name": "yarn"
+        },
+        {
+          "args": true,
+          "cmd": "bun",
+          "name": "bun"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "projects": "Projects",
+  "refreshProjects": "Refresh Projects",
+  "settings": "Settings",
+  "workspaceRoot": "Workspace Root",
+  "selectWorkspace": "Select Workspace",
+  "language": "Language",
+  "install": "Install",
+  "running": "Running...",
+  "stop": "Stop",
+  "noProjectsFound": "No Node.js projects found in the selected workspace.",
+  "selectAProject": "Select a project to see details.",
+  "exitCode": "Process exited with code",
+  "errorParsingPackageJson": "Failed to parse package.json for"
+}
