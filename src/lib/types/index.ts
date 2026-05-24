@@ -20,3 +20,9 @@ export interface AppState {
   selectedProjectId?: string;
   language: string;
 }
+
+export interface CommandLog {
+  type: 'stdout' | 'stderr' | 'info';
+  content: string;
+  timestamp: string;
+}

@@ -1,32 +1,11 @@
-import i18n from 'i18next';
-import { initReactI18next } from 'react-i18next';
-import LanguageDetector from 'i18next-browser-languagedetector';
+import { init, register, getLocaleFromNavigator } from 'svelte-i18n';
 
-import enCommon from './locales/en/common.json';
-import jaCommon from './locales/ja/common.json';
+register('en', () => import('./locales/en/common.json'));
+register('ja', () => import('./locales/ja/common.json'));
 
-i18n
-  .use(LanguageDetector)
-  .use(initReactI18next)
-  .init({
-    resources: {
-      en: {
-        common: enCommon,
-      },
-      ja: {
-        common: jaCommon,
-      },
-    },
-    fallbackLng: 'en',
-    ns: ['common'],
-    defaultNS: 'common',
-    interpolation: {
-      escapeValue: false,
-    },
-    detection: {
-      order: ['localStorage', 'navigator'],
-      caches: ['localStorage'],
-    },
-  });
+const savedLocale = localStorage.getItem('language');
 
-export default i18n;
+init({
+  fallbackLocale: 'en',
+  initialLocale: savedLocale || getLocaleFromNavigator(),
+});

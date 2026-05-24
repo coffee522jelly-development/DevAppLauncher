@@ -6,8 +6,10 @@
   "permissions": [
     "core:default",
     "opener:default",
-    "dialog:default",
-    "fs:default",
+    "dialog:allow-open",
+    "fs:allow-read-dir",
+    "fs:allow-read-file",
+    "fs:allow-exists",
     "shell:default",
     {
       "identifier": "shell:allow-spawn",

@@ -1,6 +1,6 @@
 import { readDir, readFile, exists } from '@tauri-apps/plugin-fs';
 import { join } from '@tauri-apps/api/path';
-import { Project, PackageManager } from '../types';
+import type { Project, PackageManager } from '../types';
 
 const IGNORED_DIRS = ['node_modules', 'dist', 'build', '.next', '.nuxt', '.git', 'coverage', 'target'];
 const MAX_DEPTH = 5;
