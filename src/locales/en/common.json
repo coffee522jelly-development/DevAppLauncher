@@ -13,7 +13,9 @@
   "exitCode": "Exited with code",
   "errorParsingPackageJson": "Parse error:",
   "gitServerUrl": "Git Server URL",
+  "gitUsername": "Git Username",
+  "gitToken": "Git Token / Password",
   "gitClone": "Clone",
   "gitPush": "Push",
-  "gitServerExample": "Example: https://github.com/my-org"
+  "gitServerExample": "Example: https://github.com/my-org (Use PAT for GitHub)"
 }

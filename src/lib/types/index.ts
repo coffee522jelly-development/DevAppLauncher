@@ -20,6 +20,8 @@ export interface AppState {
   selectedProjectId?: string;
   language: string;
   gitServerUrl: string;
+  gitUsername: string;
+  gitToken: string;
 }
 
 export interface CommandLog {

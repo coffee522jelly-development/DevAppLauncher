@@ -13,7 +13,9 @@
   "exitCode": "終了コード:",
   "errorParsingPackageJson": "解析失敗:",
   "gitServerUrl": "GitサーバーのURL",
+  "gitUsername": "ユーザー名",
+  "gitToken": "トークン / パスワード",
   "gitClone": "クローン",
   "gitPush": "プッシュ",
-  "gitServerExample": "例: https://github.com/my-org"
+  "gitServerExample": "例: https://github.com/my-org (GitHubの場合はPATを使用)"
 }

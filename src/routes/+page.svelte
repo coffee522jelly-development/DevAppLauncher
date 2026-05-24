@@ -11,6 +11,8 @@
 
   let workspaceRoots: string[] = $state(JSON.parse(localStorage.getItem('workspaceRoots') || '[]'));
   let gitServerUrl: string = $state(localStorage.getItem('gitServerUrl') || '');
+  let gitUsername: string = $state(localStorage.getItem('gitUsername') || '');
+  let gitToken: string = $state(localStorage.getItem('gitToken') || '');
   let projects: Project[] = $state([]);
   let selectedProjectId: string | undefined = $state();
   let showSettings = $state(false);
@@ -47,6 +49,8 @@
   $effect(() => {
     localStorage.setItem('workspaceRoots', JSON.stringify(workspaceRoots));
     localStorage.setItem('gitServerUrl', gitServerUrl);
+    localStorage.setItem('gitUsername', gitUsername);
+    localStorage.setItem('gitToken', gitToken);
     handleRefresh();
   });
 
@@ -89,7 +93,12 @@
       />
       <div class="flex-1 overflow-hidden">
         {#if selectedProject}
-          <ProjectDetails project={selectedProject} {gitServerUrl} />
+          <ProjectDetails
+            project={selectedProject}
+            {gitServerUrl}
+            {gitUsername}
+            {gitToken}
+          />
         {:else}
           <div class="h-full flex items-center justify-center text-base-content/50 italic">
             {#if projects.length > 0}
@@ -108,8 +117,12 @@
       <Settings
         {workspaceRoots}
         {gitServerUrl}
+        {gitUsername}
+        {gitToken}
         onWorkspaceRootsChange={(roots) => workspaceRoots = roots}
         onGitServerUrlChange={(url) => gitServerUrl = url}
+        onGitUsernameChange={(user) => gitUsername = user}
+        onGitTokenChange={(token) => gitToken = token}
         onClose={() => showSettings = false}
       />
     {/if}

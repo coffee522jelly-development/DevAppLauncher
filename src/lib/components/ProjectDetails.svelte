@@ -6,6 +6,8 @@
 
   export let project: Project;
   export let gitServerUrl: string = '';
+  export let gitUsername: string = '';
+  export let gitToken: string = '';
 
   $: isRunning = !!$runningProcesses[project.id];
   $: runningCmd = $runningCommands[project.id];
@@ -21,27 +23,55 @@
     runCommand(project.id, project.path, project.packageManager, ['run', scriptName]);
   }
 
-  async function handleGitClone() {
-    if (!gitServerUrl) return;
-    const baseUrl = gitServerUrl.replace(/\/$/, '');
+  function getAuthenticatedUrl() {
+    if (!gitServerUrl) return null;
+
+    let baseUrl = gitServerUrl.replace(/\/$/, '');
     const repoUrl = `${baseUrl}/${project.name}.git`;
+
+    if (gitUsername && gitToken) {
+      try {
+        const url = new URL(repoUrl);
+        url.username = gitUsername;
+        url.password = gitToken;
+        return url.toString();
+      } catch (e) {
+        // Fallback for non-standard URLs
+        if (repoUrl.startsWith('https://')) {
+          return repoUrl.replace('https://', `https://${gitUsername}:${gitToken}@`);
+        }
+      }
+    }
+    return repoUrl;
+  }
+
+  async function handleGitClone() {
+    const repoUrl = getAuthenticatedUrl();
+    if (!repoUrl) return;
 
     appendLog(project.id, {
       type: 'info',
-      content: `Attempting to link with ${repoUrl}...`,
+      content: `Attempting to link with ${repoUrl.replace(gitToken, '****')}...`,
       timestamp: new Date().toLocaleTimeString(),
     });
 
     await runCommand(project.id, project.path, 'git', ['init']);
     setTimeout(async () => {
+      // Use authenticated URL for remote
+      await runCommand(project.id, project.path, 'git', ['remote', 'remove', 'origin']).catch(() => {});
       await runCommand(project.id, project.path, 'git', ['remote', 'add', 'origin', repoUrl]);
       setTimeout(async () => {
-        await runCommand(project.id, project.path, 'git', ['fetch']);
+        await runCommand(project.id, project.path, 'git', ['fetch', 'origin']);
       }, 500);
     }, 500);
   }
 
-  function handleGitPush() {
+  async function handleGitPush() {
+    const repoUrl = getAuthenticatedUrl();
+    if (repoUrl) {
+      // Update remote URL just in case credentials changed
+      await runCommand(project.id, project.path, 'git', ['remote', 'set-url', 'origin', repoUrl]);
+    }
     runCommand(project.id, project.path, 'git', ['push', 'origin', 'HEAD']);
   }
 </script>
