@@ -3,7 +3,7 @@ import { join } from '@tauri-apps/api/path';
 import type { Project, PackageManager } from '../types';
 
 const IGNORED_DIRS = ['node_modules', 'dist', 'build', '.next', '.nuxt', '.git', 'coverage', 'target'];
-const MAX_DEPTH = 5;
+const MAX_DEPTH = 3;
 
 async function detectPackageManager(projectPath: string): Promise<PackageManager> {
   if (await exists(await join(projectPath, 'pnpm-lock.yaml'))) return 'pnpm';

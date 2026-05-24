@@ -1,5 +1,6 @@
 import { writable } from 'svelte/store';
 import { Command, type Child } from '@tauri-apps/plugin-shell';
+import { type } from '@tauri-apps/plugin-os';
 import type { CommandLog } from '../types';
 import { _ } from 'svelte-i18n';
 import { get } from 'svelte/store';
@@ -16,8 +17,20 @@ export function appendLog(projectId: string, log: CommandLog) {
 }
 
 export async function runCommand(projectId: string, cwd: string, program: string, args: string[]) {
-  const fullCommand = `${program} ${args.join(' ')}`;
   const t = get(_);
+
+  // Handle Windows command extensions
+  let actualProgram = program;
+  const isWindows = type() === 'windows';
+  if (isWindows) {
+    if (['npm', 'pnpm', 'yarn'].includes(program)) {
+      actualProgram = `${program}.cmd`;
+    } else if (program === 'bun') {
+      actualProgram = `${program}.exe`;
+    }
+  }
+
+  const fullCommand = `${actualProgram} ${args.join(' ')}`;
 
   appendLog(projectId, {
     type: 'info',
@@ -26,7 +39,7 @@ export async function runCommand(projectId: string, cwd: string, program: string
   });
 
   try {
-    const command = Command.create(program, args, { cwd });
+    const command = Command.create(actualProgram, args, { cwd });
 
     command.on('close', (data) => {
       appendLog(projectId, {

@@ -21,46 +21,60 @@
   }
 </script>
 
-<div class="flex flex-col h-full p-6 space-y-6 overflow-hidden">
-  <div class="flex flex-col">
-    <div class="flex items-center space-x-3">
-      <h1 class="text-3xl font-bold">{project.name}</h1>
-      <div class="badge badge-primary">{project.packageManager}</div>
-    </div>
-    <p class="text-sm text-base-content/60 mt-1 truncate">{project.path}</p>
-  </div>
-
-  <div class="flex flex-wrap gap-2 py-2">
-    <button
-      class="btn btn-primary btn-sm"
-      disabled={isRunning}
-      on:click={handleInstall}
-    >
-      {$_('install')}
-    </button>
-    {#each Object.keys(project.scripts) as scriptName}
-      <button
-        class="btn btn-outline btn-sm"
-        disabled={isRunning}
-        title={project.scripts[scriptName]}
-        on:click={() => handleRunScript(scriptName)}
-      >
-        {scriptName}
-      </button>
-    {/each}
-  </div>
-
-  {#if isRunning}
-    <div class="alert alert-info shadow-lg flex justify-between items-center py-2 px-4">
-      <div class="flex items-center space-x-2">
-        <span class="loading loading-spinner loading-xs"></span>
-        <span class="text-sm">{$_('running')} <code class="bg-base-300 px-1 rounded">{runningCmd}</code></span>
+<div class="flex flex-col h-full p-6 space-y-6 overflow-hidden bg-base-100">
+  <div class="flex flex-col border-b border-base-300 pb-4">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <h1 class="text-2xl font-bold text-base-content">{project.name}</h1>
+        <div class="badge badge-primary badge-outline">{project.packageManager}</div>
       </div>
-      <button class="btn btn-error btn-xs" on:click={() => stopCommand(project.id)}>
-        {$_('stop')}
-      </button>
     </div>
-  {/if}
+    <div class="text-xs text-base-content/50 mt-1 font-mono bg-base-200 p-1 rounded inline-block truncate">
+      {project.path}
+    </div>
+  </div>
 
-  <LogViewer {projectLogs} />
+  <div class="space-y-4 flex-none">
+    <div class="flex flex-wrap gap-2">
+      <button
+        class="btn btn-primary btn-sm"
+        disabled={isRunning}
+        on:click={handleInstall}
+      >
+        <span class="icon">📥</span> {$_('install')}
+      </button>
+
+      <div class="divider divider-horizontal mx-0"></div>
+
+      {#each Object.keys(project.scripts) as scriptName}
+        <button
+          class="btn btn-outline btn-sm btn-secondary"
+          disabled={isRunning}
+          title={project.scripts[scriptName]}
+          on:click={() => handleRunScript(scriptName)}
+        >
+          {scriptName}
+        </button>
+      {/each}
+    </div>
+  </div>
+
+  <div class="flex-1 flex flex-col min-h-0">
+    {#if isRunning}
+      <div class="alert alert-info shadow-sm flex justify-between items-center py-2 px-4 mb-4 rounded-lg border-l-4">
+        <div class="flex items-center space-x-3">
+          <span class="loading loading-spinner loading-xs text-info"></span>
+          <div class="flex flex-col">
+            <span class="text-xs font-bold uppercase opacity-70">{$_('running')}</span>
+            <code class="text-xs">{runningCmd}</code>
+          </div>
+        </div>
+        <button class="btn btn-error btn-xs" on:click={() => stopCommand(project.id)}>
+          {$_('stop')}
+        </button>
+      </div>
+    {/if}
+
+    <LogViewer {projectLogs} />
+  </div>
 </div>

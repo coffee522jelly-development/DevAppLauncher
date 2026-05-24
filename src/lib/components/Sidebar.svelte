@@ -11,10 +11,10 @@
   export let onOpenSettings: () => void;
 </script>
 
-<div class="w-64 bg-base-200 border-r border-base-300 flex flex-col h-full overflow-hidden">
-  <div class="p-4 flex justify-between items-center border-b border-base-300">
-    <h2 class="font-bold uppercase tracking-wider text-xs text-base-content/70">{$_('projects')}</h2>
-    <button class="btn btn-ghost btn-xs" on:click={onRefresh} disabled={isScanning}>
+<div class="w-64 bg-base-200 border-r border-base-300 flex flex-col h-full overflow-hidden shadow-lg z-10">
+  <div class="p-4 flex justify-between items-center bg-base-300 shadow-sm">
+    <h2 class="font-black uppercase tracking-tighter text-sm text-base-content">{$_('projects')}</h2>
+    <button class="btn btn-ghost btn-circle btn-xs" on:click={onRefresh} disabled={isScanning}>
       {#if isScanning}
         <span class="loading loading-spinner loading-xs"></span>
       {:else}
@@ -24,22 +24,23 @@
   </div>
 
   <div class="flex-1 overflow-y-auto p-2">
-    <ul class="menu w-full p-0">
+    <ul class="menu menu-md w-full p-0 gap-1">
       {#each projects as project}
         <li>
           <button
-            class={selectedProjectId === project.id ? 'active' : ''}
+            class="rounded-lg {selectedProjectId === project.id ? 'active bg-primary text-primary-content' : 'hover:bg-base-300'}"
             on:click={() => onSelectProject(project.id)}
           >
-            📁 {project.name}
+            <span class="text-lg">📁</span>
+            <span class="truncate font-medium">{project.name}</span>
           </button>
         </li>
       {/each}
     </ul>
   </div>
 
-  <div class="p-4 border-t border-base-300">
-    <button class="btn btn-block btn-outline btn-sm" on:click={onOpenSettings}>
+  <div class="p-4 border-t border-base-300 bg-base-300/50">
+    <button class="btn btn-block btn-neutral btn-sm shadow-md" on:click={onOpenSettings}>
       ⚙️ {$_('settings')}
     </button>
   </div>

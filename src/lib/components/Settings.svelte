@@ -29,50 +29,57 @@
 </script>
 
 <div class="modal modal-open">
-  <div class="modal-box max-w-xl">
+  <div class="modal-box max-w-xl border border-base-300 shadow-2xl bg-base-100">
     <div class="flex justify-between items-center mb-6">
-      <h3 class="font-bold text-lg">{$_('settings')}</h3>
+      <h3 class="font-black text-2xl text-primary">{$_('settings')}</h3>
       <button class="btn btn-sm btn-circle btn-ghost" on:click={onClose}>✕</button>
     </div>
 
     <div class="space-y-6">
       <div class="form-control">
         <label class="label">
-          <span class="label-text font-bold">{$_('workspaceRoot')}</span>
+          <span class="label-text font-black uppercase text-xs opacity-60">{$_('workspaceRoot')}</span>
         </label>
-        <div class="space-y-2">
+        <div class="space-y-2 max-h-48 overflow-y-auto p-1">
+          {#if workspaceRoots.length === 0}
+            <div class="text-center py-4 border-2 border-dashed border-base-300 rounded-lg text-sm opacity-50 italic">
+              No workspaces added
+            </div>
+          {/if}
           {#each workspaceRoots as root}
-            <div class="flex items-center justify-between bg-base-200 p-2 rounded-lg text-sm group">
-              <span class="truncate pr-2" title={root}>{root}</span>
-              <button class="btn btn-ghost btn-xs text-error opacity-0 group-hover:opacity-100" on:click={() => handleRemoveWorkspace(root)}>
+            <div class="flex items-center justify-between bg-base-200 p-3 rounded-xl text-xs group hover:bg-base-300 transition-colors border border-base-300">
+              <span class="truncate pr-4 font-mono" title={root}>{root}</span>
+              <button class="btn btn-circle btn-ghost btn-xs text-error" on:click={() => handleRemoveWorkspace(root)}>
                 ✕
               </button>
             </div>
           {/each}
-          <button class="btn btn-primary btn-block btn-sm mt-2" on:click={handleAddWorkspace}>
-            + {$_('selectWorkspace')}
-          </button>
         </div>
+        <button class="btn btn-primary btn-block btn-sm mt-4 shadow-lg" on:click={handleAddWorkspace}>
+          <span class="text-lg">+</span> {$_('selectWorkspace')}
+        </button>
       </div>
+
+      <div class="divider"></div>
 
       <div class="form-control">
         <label class="label">
-          <span class="label-text font-bold">{$_('language')}</span>
+          <span class="label-text font-black uppercase text-xs opacity-60">{$_('language')}</span>
         </label>
         <select
-          class="select select-bordered select-sm w-full"
+          class="select select-bordered select-sm w-full font-bold focus:select-primary"
           value={$locale}
           on:change={(e) => handleLanguageChange(e.currentTarget.value)}
         >
-          <option value="en">English</option>
-          <option value="ja">日本語</option>
+          <option value="en">English (US)</option>
+          <option value="ja">日本語 (JP)</option>
         </select>
       </div>
     </div>
 
     <div class="modal-action">
-      <button class="btn" on:click={onClose}>Close</button>
+      <button class="btn btn-neutral" on:click={onClose}>Close</button>
     </div>
   </div>
-  <div class="modal-backdrop bg-black/50" on:click={onClose}></div>
+  <div class="modal-backdrop bg-black/70 backdrop-blur-sm" on:click={onClose}></div>
 </div>

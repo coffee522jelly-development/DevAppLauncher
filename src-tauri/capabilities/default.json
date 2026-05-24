@@ -7,33 +7,30 @@
     "core:default",
     "opener:default",
     "dialog:allow-open",
-    "fs:allow-read-dir",
-    "fs:allow-read-file",
-    "fs:allow-exists",
+    {
+      "identifier": "fs:allow-read-dir",
+      "scope": ["**"]
+    },
+    {
+      "identifier": "fs:allow-read-file",
+      "scope": ["**"]
+    },
+    {
+      "identifier": "fs:allow-exists",
+      "scope": ["**"]
+    },
     "shell:default",
     {
       "identifier": "shell:allow-spawn",
       "allow": [
-        {
-          "args": true,
-          "cmd": "npm",
-          "name": "npm"
-        },
-        {
-          "args": true,
-          "cmd": "pnpm",
-          "name": "pnpm"
-        },
-        {
-          "args": true,
-          "cmd": "yarn",
-          "name": "yarn"
-        },
-        {
-          "args": true,
-          "cmd": "bun",
-          "name": "bun"
-        }
+        { "name": "npm", "cmd": "npm", "args": true },
+        { "name": "npm.cmd", "cmd": "npm.cmd", "args": true },
+        { "name": "pnpm", "cmd": "pnpm", "args": true },
+        { "name": "pnpm.cmd", "cmd": "pnpm.cmd", "args": true },
+        { "name": "yarn", "cmd": "yarn", "args": true },
+        { "name": "yarn.cmd", "cmd": "yarn.cmd", "args": true },
+        { "name": "bun", "cmd": "bun", "args": true },
+        { "name": "bun.exe", "cmd": "bun.exe", "args": true }
       ]
     }
   ]
