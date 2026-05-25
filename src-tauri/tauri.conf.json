@@ -31,11 +31,13 @@
       "icons/icon.icns",
       "icons/icon.ico"
     ],
-    "msi": {
-      "language": "ja-JP"
-    },
-    "nsis": {
-      "languages": ["Japanese"]
+    "windows": {
+      "wix": {
+        "language": "ja-JP"
+      },
+      "nsis": {
+        "languages": ["Japanese"]
+      }
     }
   }
 }
