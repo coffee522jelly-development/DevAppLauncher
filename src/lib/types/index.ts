@@ -6,6 +6,7 @@ export interface Project {
   path: string;
   packageManager: PackageManager;
   scripts: Record<string, string>;
+  isTauri: boolean;
 }
 
 export interface RunningProcess {

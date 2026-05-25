@@ -104,19 +104,40 @@
         </div>
       {/if}
 
-      {#if hasScripts}
+      {#if hasScripts || project.isTauri}
         <div class="divider divider-horizontal mx-0"></div>
-        <div class="join">
-          {#each Object.keys(project.scripts) as scriptName}
-            <button
-              class="btn btn-outline btn-sm btn-secondary join-item"
-              disabled={isRunning}
-              title={project.scripts[scriptName]}
-              on:click={() => handleRunScript(scriptName)}
-            >
-              {scriptName}
-            </button>
-          {/each}
+        <div class="flex flex-wrap gap-1">
+          {#if project.isTauri}
+            <div class="join mr-1">
+              <button
+                class="btn btn-info btn-sm join-item"
+                disabled={isRunning}
+                on:click={() => handleRunScript('tauri dev')}
+              >
+                🚀 tauri dev
+              </button>
+              <button
+                class="btn btn-info btn-sm join-item"
+                disabled={isRunning}
+                on:click={() => handleRunScript('tauri build')}
+              >
+                🏗️ tauri build
+              </button>
+            </div>
+          {/if}
+
+          <div class="join flex-wrap">
+            {#each Object.keys(project.scripts) as scriptName}
+              <button
+                class="btn btn-outline btn-sm btn-secondary join-item"
+                disabled={isRunning}
+                title={project.scripts[scriptName]}
+                on:click={() => handleRunScript(scriptName)}
+              >
+                {scriptName}
+              </button>
+            {/each}
+          </div>
         </div>
       {/if}
 
