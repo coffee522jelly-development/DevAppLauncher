@@ -1,4 +1,4 @@
-import { readDir, readFile, exists } from '@tauri-apps/plugin-fs';
+import { readDir, readTextFile, exists } from '@tauri-apps/plugin-fs';
 import { join } from '@tauri-apps/api/path';
 import type { Project, PackageManager } from '../types';
 
@@ -19,9 +19,11 @@ async function createProjectFromPath(path: string): Promise<Project> {
 
   try {
     const packageJsonPath = await join(path, 'package.json');
-    if (await exists(packageJsonPath)) {
-      const content = await readFile(packageJsonPath);
-      const pkg = JSON.parse(new TextDecoder().decode(content));
+    const hasPackageJson = await exists(packageJsonPath);
+
+    if (hasPackageJson) {
+      const content = await readTextFile(packageJsonPath);
+      const pkg = JSON.parse(content);
       scripts = pkg.scripts || {};
       packageManager = await detectPackageManager(path);
     }
@@ -29,7 +31,7 @@ async function createProjectFromPath(path: string): Promise<Project> {
     const tauriDirPath = await join(path, 'src-tauri');
     isTauri = await exists(tauriDirPath);
   } catch (e) {
-    // Ignore errors, return project with empty scripts
+    console.error(`Error processing project at ${path}:`, e);
   }
 
   return {

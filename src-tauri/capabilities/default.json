@@ -16,7 +16,15 @@
       "scope": ["**"]
     },
     {
+      "identifier": "fs:allow-read-text-file",
+      "scope": ["**"]
+    },
+    {
       "identifier": "fs:allow-exists",
+      "scope": ["**"]
+    },
+    {
+      "identifier": "fs:allow-stat",
       "scope": ["**"]
     },
     "shell:default",
