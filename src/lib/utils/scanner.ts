@@ -43,29 +43,12 @@ async function createProjectFromPath(path: string): Promise<Project> {
 }
 
 export async function scanWorkspace(rootPath: string): Promise<Project[]> {
-  const projects: Project[] = [];
-
   try {
-    // 1. Check if the root path itself is a project
-    const rootPkgPath = await join(rootPath, 'package.json');
-    if (await exists(rootPkgPath)) {
-      projects.push(await createProjectFromPath(rootPath));
-    }
-
-    // 2. Treat immediate subdirectories as projects IF they contain package.json
-    const entries = await readDir(rootPath);
-    for (const entry of entries) {
-      if (entry.isDirectory && !IGNORED_DIRS.includes(entry.name)) {
-        const subPath = await join(rootPath, entry.name);
-        const subPkgPath = await join(subPath, 'package.json');
-        if (await exists(subPkgPath)) {
-          projects.push(await createProjectFromPath(subPath));
-        }
-      }
-    }
+    // Only return the root path as a project.
+    // This simplifies the UI to only show explicitly added workspace roots.
+    return [await createProjectFromPath(rootPath)];
   } catch (e) {
     console.error(`Failed to scan workspace ${rootPath}`, e);
+    return [];
   }
-
-  return projects;
 }
