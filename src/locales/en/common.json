@@ -17,5 +17,6 @@
   "gitToken": "Git Token / Password",
   "gitClone": "Clone",
   "gitPush": "Push",
-  "gitServerExample": "Example: https://github.com/my-org (Use PAT for GitHub)"
+  "gitServerExample": "Example: https://github.com/my-org (Use PAT for GitHub)",
+  "theme": "Theme"
 }

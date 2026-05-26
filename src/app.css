@@ -5,11 +5,6 @@
   --font-sans: "Inter", "Avenir", "Helvetica", "Arial", sans-serif;
 }
 
-:root {
-  background-color: #1d232a;
-  color: #a6adbb;
-}
-
 body {
   margin: 0;
   min-height: 100vh;

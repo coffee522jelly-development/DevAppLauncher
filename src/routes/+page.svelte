@@ -13,6 +13,7 @@
   let gitServerUrl: string = $state(localStorage.getItem('gitServerUrl') || '');
   let gitUsername: string = $state(localStorage.getItem('gitUsername') || '');
   let gitToken: string = $state(localStorage.getItem('gitToken') || '');
+  let currentTheme: string = $state(localStorage.getItem('theme') || 'night');
   let projects: Project[] = $state([]);
   let selectedProjectId: string | undefined = $state();
   let showSettings = $state(false);
@@ -52,6 +53,8 @@
     localStorage.setItem('gitServerUrl', gitServerUrl);
     localStorage.setItem('gitUsername', gitUsername);
     localStorage.setItem('gitToken', gitToken);
+    localStorage.setItem('theme', currentTheme);
+    window.dispatchEvent(new CustomEvent('theme-change', { detail: { theme: currentTheme } }));
   });
 
   // Scan effect - only runs when workspaceRoots change
@@ -127,10 +130,12 @@
         {gitServerUrl}
         {gitUsername}
         {gitToken}
+        {currentTheme}
         onWorkspaceRootsChange={(roots) => workspaceRoots = roots}
         onGitServerUrlChange={(url) => gitServerUrl = url}
         onGitUsernameChange={(user) => gitUsername = user}
         onGitTokenChange={(token) => gitToken = token}
+        onThemeChange={(theme) => currentTheme = theme}
         onClose={() => showSettings = false}
       />
     {/if}

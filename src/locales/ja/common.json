@@ -17,5 +17,6 @@
   "gitToken": "トークン / パスワード",
   "gitClone": "クローン",
   "gitPush": "プッシュ",
-  "gitServerExample": "例: https://github.com/my-org (GitHubの場合はPATを使用)"
+  "gitServerExample": "例: https://github.com/my-org (GitHubの場合はPATを使用)",
+  "theme": "テーマ"
 }

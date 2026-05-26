@@ -6,11 +6,13 @@
   export let gitServerUrl: string = '';
   export let gitUsername: string = '';
   export let gitToken: string = '';
+  export let currentTheme: string = 'night';
 
   export let onWorkspaceRootsChange: (roots: string[]) => void;
   export let onGitServerUrlChange: (url: string) => void;
   export let onGitUsernameChange: (user: string) => void;
   export let onGitTokenChange: (token: string) => void;
+  export let onThemeChange: (theme: string) => void;
   export let onClose: () => void;
 
   async function handleAddWorkspace() {
@@ -126,6 +128,50 @@
         >
           <option value="en">English (US)</option>
           <option value="ja">日本語 (JP)</option>
+        </select>
+      </div>
+
+      <div class="form-control">
+        <label class="label">
+          <span class="label-text font-black uppercase text-xs opacity-60">{$_('theme')}</span>
+        </label>
+        <select
+          class="select select-bordered select-sm w-full font-bold focus:select-primary"
+          value={currentTheme}
+          on:change={(e) => onThemeChange(e.currentTarget.value)}
+        >
+          <option value="light">Light</option>
+          <option value="dark">Dark</option>
+          <option value="cupcake">Cupcake</option>
+          <option value="bumblebee">Bumblebee</option>
+          <option value="emerald">Emerald</option>
+          <option value="corporate">Corporate</option>
+          <option value="synthwave">Synthwave</option>
+          <option value="retro">Retro</option>
+          <option value="cyberpunk">Cyberpunk</option>
+          <option value="valentine">Valentine</option>
+          <option value="halloween">Halloween</option>
+          <option value="garden">Garden</option>
+          <option value="forest">Forest</option>
+          <option value="aqua">Aqua</option>
+          <option value="lofi">Lofi</option>
+          <option value="pastel">Pastel</option>
+          <option value="fantasy">Fantasy</option>
+          <option value="wireframe">Wireframe</option>
+          <option value="black">Black</option>
+          <option value="luxury">Luxury</option>
+          <option value="dracula">Dracula</option>
+          <option value="cmyk">Cmyk</option>
+          <option value="autumn">Autumn</option>
+          <option value="business">Business</option>
+          <option value="acid">Acid</option>
+          <option value="lemonade">Lemonade</option>
+          <option value="night">Night</option>
+          <option value="coffee">Coffee</option>
+          <option value="winter">Winter</option>
+          <option value="dim">Dim</option>
+          <option value="nord">Nord</option>
+          <option value="sunset">Sunset</option>
         </select>
       </div>
     </div>
