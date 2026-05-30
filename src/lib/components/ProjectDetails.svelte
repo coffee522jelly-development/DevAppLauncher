@@ -21,7 +21,9 @@
   }
 
   function handleRunScript(scriptName: string) {
-    runCommand(project.id, project.path, project.packageManager, ['run', scriptName]);
+    // If scriptName contains spaces (like 'tauri dev'), split it so args are passed correctly
+    const scriptArgs = scriptName.split(' ');
+    runCommand(project.id, project.path, project.packageManager, ['run', ...scriptArgs]);
   }
 
   function getAuthenticatedUrl() {
