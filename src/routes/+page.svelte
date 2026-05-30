@@ -89,7 +89,7 @@
       <div class="flex-1 flex flex-col items-center justify-center space-y-6 text-center px-4">
         <h1 class="text-5xl font-black tracking-tighter bg-gradient-to-br from-primary to-secondary bg-clip-text text-transparent">DevAppLauncher</h1>
         <p class="text-base-content/60 max-w-sm">Manage your projects and workspaces from a single desktop GUI.</p>
-        <button class="btn btn-primary btn-lg shadow-xl" on:click={handleSelectWorkspace}>
+        <button type="button" class="btn btn-primary btn-lg shadow-xl" onclick={handleSelectWorkspace}>
           {$_('selectWorkspace')}
         </button>
       </div>

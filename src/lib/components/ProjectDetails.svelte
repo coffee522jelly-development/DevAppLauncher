@@ -118,7 +118,11 @@
   }
 
   let customCommand = $state('');
-  let recentCommands: string[] = $state(JSON.parse(localStorage.getItem(`recent_${project.id}`) || '[]'));
+  let recentCommands: string[] = $state([]);
+
+  $effect(() => {
+    recentCommands = JSON.parse(localStorage.getItem(`recent_${project.id}`) || '[]');
+  });
 
   function handleCustomCommand() {
     if (!customCommand.trim()) return;
@@ -256,6 +260,7 @@
             <div class="flex gap-1">
               {#each recentCommands as cmd}
                 <button
+                  type="button"
                   class="text-[10px] font-mono px-2 py-0.5 rounded hover:bg-muted transition-colors opacity-60 hover:opacity-100"
                   onclick={() => customCommand = cmd}
                 >
@@ -271,7 +276,7 @@
           bind:value={customCommand}
           placeholder="e.g. npm install -D tauri-icon"
           class="font-mono text-xs h-8"
-          onkeydown={(e) => e.key === 'Enter' && handleCustomCommand()}
+          onkeydown={(e: KeyboardEvent) => e.key === 'Enter' && handleCustomCommand()}
         />
         <Button size="sm" class="h-8 px-4" disabled={isRunning || !customCommand.trim()} onclick={handleCustomCommand}>
           {$_('run')}

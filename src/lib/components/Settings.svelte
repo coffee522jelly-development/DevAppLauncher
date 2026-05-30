@@ -77,9 +77,9 @@
 </script>
 
 <div class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-hidden">
-  <div class="fixed inset-0 bg-black/60" onclick={onClose}></div>
+  <div class="fixed inset-0 bg-black/70" aria-hidden="true" onclick={onClose}></div>
 
-  <div class="relative w-full max-w-2xl max-h-[90vh] bg-card text-card-foreground border rounded-xl shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-150">
+  <div class="relative w-full max-w-2xl max-h-[90vh] bg-background text-foreground border rounded-xl shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-150">
     <!-- Header -->
     <div class="flex items-center justify-between p-6 border-b shrink-0">
       <div class="space-y-1">
