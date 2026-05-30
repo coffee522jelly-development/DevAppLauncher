@@ -5,9 +5,60 @@
 
 @theme {
   --font-sans: "Inter", "Avenir", "Helvetica", "Arial", sans-serif;
+  --color-border: var(--b3);
+  --color-input: var(--b3);
+  --color-ring: var(--p);
+  --color-background: var(--b1);
+  --color-foreground: var(--bc);
+  --color-primary: var(--p);
+  --color-primary-foreground: var(--pc);
+  --color-secondary: var(--s);
+  --color-secondary-foreground: var(--sc);
+  --color-accent: var(--a);
+  --color-accent-foreground: var(--ac);
+  --color-destructive: var(--er);
+  --color-destructive-foreground: var(--erc);
+  --color-muted: var(--b2);
+  --color-muted-foreground: color-mix(in srgb, var(--bc) 60%, transparent);
+  --color-card: var(--b1);
+  --color-card-foreground: var(--bc);
+  --color-popover: var(--b1);
+  --color-popover-foreground: var(--bc);
 }
 
 body {
   margin: 0;
   min-height: 100vh;
+  @apply antialiased font-sans bg-background text-foreground;
+}
+
+/* shadcn-svelte animations */
+@keyframes in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+@keyframes zoom-in {
+  from { transform: scale(0.95); }
+  to { transform: scale(1); }
+}
+@keyframes zoom-out {
+  from { transform: scale(1); }
+  to { transform: scale(0.95); }
+}
+
+.animate-in {
+  animation: in 150ms ease-out;
+}
+.animate-out {
+  animation: out 150ms ease-in;
+}
+.zoom-in-95 {
+  animation: zoom-in 150ms ease-out;
+}
+.zoom-out-95 {
+  animation: zoom-out 150ms ease-in;
 }

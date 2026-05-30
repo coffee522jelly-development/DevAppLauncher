@@ -1,9 +1,30 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
   import { revealItemInDir } from '@tauri-apps/plugin-opener';
+  import {
+    Play,
+    Square,
+    Download,
+    GitBranch,
+    Send,
+    ShieldCheck,
+    ArrowUpCircle,
+    ExternalLink,
+    Monitor,
+    Keyboard,
+    Folder,
+    Terminal,
+    History
+  } from 'lucide-svelte';
   import type { Project } from '../types';
   import { runCommand, runCustomCommand, stopCommand, runningProcesses, runningCommands, logs, appendLog } from '../stores/commands';
   import LogViewer from './LogViewer.svelte';
+  import { Button } from './ui/button';
+  import { Badge } from './ui/badge';
+  import { Input } from './ui/input';
+  import { Separator } from './ui/separator';
+  import { ScrollArea } from './ui/scroll-area';
+  import * as Tooltip from './ui/tooltip';
 
   let { project, gitServerUrl = '', gitUsername = '', gitToken = '' }: {
     project: Project,
@@ -24,17 +45,14 @@
   }
 
   function handleRunScript(scriptName: string) {
-    // If scriptName contains spaces (like 'tauri dev'), split it so args are passed correctly
     const scriptArgs = scriptName.split(' ');
     runCommand(project.id, project.path, project.packageManager, ['run', ...scriptArgs]);
   }
 
   function getAuthenticatedUrl() {
     if (!gitServerUrl) return null;
-
     let baseUrl = gitServerUrl.replace(/\/$/, '');
     const repoUrl = `${baseUrl}/${project.name}.git`;
-
     if (gitUsername && gitToken) {
       try {
         const url = new URL(repoUrl);
@@ -53,15 +71,12 @@
   async function handleGitClone() {
     const repoUrl = getAuthenticatedUrl();
     if (!repoUrl) return;
-
     appendLog(project.id, {
       type: 'info',
       content: `Linking with ${repoUrl.split('@').pop()?.replace(gitToken, '****')}...`,
       timestamp: new Date().toLocaleTimeString(),
     });
-
     const mask = [gitToken];
-
     await runCommand(project.id, project.path, 'git', ['init'], mask);
     setTimeout(async () => {
       await runCommand(project.id, project.path, 'git', ['remote', 'remove', 'origin'], mask).catch(() => {});
@@ -95,8 +110,7 @@
   }
 
   function handleCheckUpdates() {
-    const args = project.packageManager === 'npm' ? ['outdated'] : ['outdated'];
-    runCommand(project.id, project.path, project.packageManager, args);
+    runCommand(project.id, project.path, project.packageManager, ['outdated']);
   }
 
   function handlePreview() {
@@ -108,10 +122,7 @@
 
   function handleCustomCommand() {
     if (!customCommand.trim()) return;
-
     runCustomCommand(project.id, project.path, customCommand);
-
-    // Update history
     const updated = [customCommand, ...recentCommands.filter(c => c !== customCommand)].slice(0, 5);
     recentCommands = updated;
     localStorage.setItem(`recent_${project.id}`, JSON.stringify(updated));
@@ -119,164 +130,153 @@
   }
 </script>
 
-<div class="flex flex-col h-full p-6 space-y-6 overflow-hidden bg-base-100 text-base-content">
-  <div class="flex flex-col border-b border-base-300 pb-4">
+<div class="flex flex-col h-full bg-background text-foreground overflow-hidden">
+  <!-- Header -->
+  <header class="p-6 border-b bg-card/50">
     <div class="flex items-center justify-between">
-      <div class="flex items-center space-x-3">
-        <h1 class="text-2xl font-bold">{project.name}</h1>
-        <div class="badge badge-primary badge-outline">{project.packageManager}</div>
+      <div class="space-y-1">
+        <div class="flex items-center gap-3">
+          <h1 class="text-2xl font-bold tracking-tight">{project.name}</h1>
+          <Badge variant="outline" class="font-mono uppercase px-2 py-0">{project.packageManager}</Badge>
+          {#if project.isTauri}
+            <Badge variant="secondary" class="font-bold">TAURI</Badge>
+          {/if}
+        </div>
+        <p class="text-xs text-muted-foreground font-mono bg-muted/50 px-2 py-1 rounded inline-block">
+          {project.path}
+        </p>
       </div>
       <div class="flex items-center gap-2">
-        <button class="btn btn-ghost btn-sm tooltip tooltip-left" data-tip={$_('openVSCode')} on:click={handleOpenVSCode}>
-          <span class="text-xl">⌨️</span>
-        </button>
-        <button class="btn btn-ghost btn-sm tooltip tooltip-left" data-tip={$_('openFolder')} on:click={handleOpenFolder}>
-          <span class="text-xl">📂</span>
-        </button>
+        <Button variant="ghost" size="icon" onclick={handleOpenVSCode} title={$_('openVSCode')}>
+          <Keyboard class="h-5 w-5" />
+        </Button>
+        <Button variant="ghost" size="icon" onclick={handleOpenFolder} title={$_('openFolder')}>
+          <Folder class="h-5 w-5" />
+        </Button>
       </div>
     </div>
-    <div class="text-xs opacity-50 mt-1 font-mono bg-base-200 p-1 rounded inline-block truncate">
-      {project.path}
+  </header>
+
+  <!-- Toolbar -->
+  <div class="px-6 py-4 bg-muted/20 border-b flex flex-wrap gap-4 items-center">
+    <div class="flex items-center gap-2">
+      <Button size="sm" class="gap-2" disabled={isRunning} onclick={handleInstall}>
+        <Download class="h-4 w-4" />
+        {$_('install')}
+      </Button>
+    </div>
+
+    <Separator orientation="vertical" class="h-8" />
+
+    <div class="flex items-center gap-2">
+      {#if project.isTauri}
+        <Button variant="outline" size="sm" class="border-blue-500/50 hover:bg-blue-500/10 gap-2" disabled={isRunning} onclick={() => handleRunScript('tauri dev')}>
+          <Play class="h-4 w-4 text-blue-500" />
+          tauri dev
+        </Button>
+        <Button variant="outline" size="sm" class="border-blue-500/50 hover:bg-blue-500/10 gap-2" disabled={isRunning} onclick={() => handleRunScript('tauri build')}>
+          <Monitor class="h-4 w-4 text-blue-500" />
+          tauri build
+        </Button>
+      {/if}
+
+      <div class="flex flex-wrap gap-1">
+        {#each Object.keys(project.scripts).filter(s => s !== 'tauri') as scriptName}
+          <Button variant="outline" size="sm" disabled={isRunning} onclick={() => handleRunScript(scriptName)}>
+            {scriptName}
+          </Button>
+        {/each}
+      </div>
+    </div>
+
+    <Separator orientation="vertical" class="h-8" />
+
+    <div class="flex items-center gap-2">
+      <Button variant="secondary" size="sm" class="gap-2" disabled={isRunning || !gitServerUrl} onclick={handleGitClone}>
+        <GitBranch class="h-4 w-4" />
+        {$_('gitClone')}
+      </Button>
+      <Button variant="secondary" size="sm" class="gap-2" disabled={isRunning} onclick={handleGitPush}>
+        <Send class="h-4 w-4" />
+        {$_('gitPush')}
+      </Button>
+    </div>
+
+    <Separator orientation="vertical" class="h-8" />
+
+    <div class="flex items-center gap-2">
+      <Button variant="ghost" size="sm" class="gap-2" disabled={isRunning} onclick={handleAuditFix}>
+        <ShieldCheck class="h-4 w-4" />
+        Audit
+      </Button>
+      <Button variant="ghost" size="sm" class="gap-2" disabled={isRunning} onclick={handleCheckUpdates}>
+        <ArrowUpCircle class="h-4 w-4" />
+        Updates
+      </Button>
+      <Button variant="ghost" size="sm" class="gap-2" disabled={isRunning} onclick={handlePreview}>
+        <ExternalLink class="h-4 w-4" />
+        Preview
+      </Button>
     </div>
   </div>
 
-  <div class="space-y-4 flex-none">
-    <div class="flex flex-wrap gap-2 items-center">
-      {#if hasScripts || project.packageManager}
-        <div class="join">
-          <button
-            class="btn btn-primary btn-sm join-item"
-            disabled={isRunning}
-            on:click={handleInstall}
-          >
-            📥 {$_('install')}
-          </button>
-        </div>
-      {/if}
-
-      {#if hasScripts || project.isTauri}
-        <div class="divider divider-horizontal mx-0"></div>
-        <div class="flex flex-wrap gap-1">
-          {#if project.isTauri}
-            <div class="join mr-1">
-              <button
-                class="btn btn-info btn-sm join-item"
-                disabled={isRunning}
-                on:click={() => handleRunScript('tauri dev')}
-              >
-                🚀 tauri dev
-              </button>
-              <button
-                class="btn btn-info btn-sm join-item"
-                disabled={isRunning}
-                on:click={() => handleRunScript('tauri build')}
-              >
-                🏗️ tauri build
-              </button>
-            </div>
-          {/if}
-
-          <div class="join flex-wrap">
-            {#each Object.keys(project.scripts) as scriptName}
-              <button
-                class="btn btn-outline btn-sm btn-secondary join-item"
-                disabled={isRunning}
-                title={project.scripts[scriptName]}
-                on:click={() => handleRunScript(scriptName)}
-              >
-                {scriptName}
-              </button>
-            {/each}
-          </div>
-        </div>
-      {/if}
-
-      <div class="divider divider-horizontal mx-0"></div>
-
-      <div class="join">
-        <button
-          class="btn btn-sm btn-accent join-item"
-          disabled={isRunning || !gitServerUrl}
-          on:click={handleGitClone}
-          title={gitServerUrl ? `Link with ${gitServerUrl}` : 'Set Git Server URL in settings'}
-        >
-          🐙 {$_('gitClone')}
-        </button>
-        <button
-          class="btn btn-sm btn-accent join-item"
-          disabled={isRunning}
-          on:click={handleGitPush}
-        >
-          ⬆️ {$_('gitPush')}
-        </button>
-      </div>
-
-      <div class="divider divider-horizontal mx-0"></div>
-
-      <div class="join">
-        <button class="btn btn-sm btn-neutral join-item" disabled={isRunning} on:click={handleAuditFix} title="audit fix">
-          🛡️ Audit
-        </button>
-        <button class="btn btn-sm btn-neutral join-item" disabled={isRunning} on:click={handleCheckUpdates} title="outdated">
-          🆙 Updates
-        </button>
-        <button class="btn btn-sm btn-neutral join-item" disabled={isRunning} on:click={handlePreview} title="npx serve">
-          🌐 Preview
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <div class="flex-1 flex flex-col min-h-0">
+  <!-- Content Area (Logs) -->
+  <div class="flex-1 min-h-0 flex flex-col relative bg-zinc-950">
     {#if isRunning}
-      <div class="alert alert-info shadow-sm flex justify-between items-center py-2 px-4 mb-4 rounded-lg border-l-4 border-info">
-        <div class="flex items-center space-x-3">
-          <span class="loading loading-spinner loading-xs text-info"></span>
-          <div class="flex flex-col text-info-content">
-            <span class="text-xs font-bold uppercase opacity-70">{$_('running')}</span>
-            <code class="text-xs">{runningCmd}</code>
-          </div>
+      <div class="absolute top-4 right-4 z-20 flex items-center gap-4 bg-zinc-900/90 backdrop-blur border border-zinc-800 p-2 rounded-lg shadow-2xl">
+        <div class="flex items-center gap-2 px-2">
+          <span class="relative flex h-2 w-2">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-2 w-2 bg-sky-500"></span>
+          </span>
+          <span class="text-xs font-bold text-sky-400 uppercase tracking-widest">{$_('running')}</span>
+          <code class="text-[10px] text-zinc-400 max-w-[200px] truncate">{runningCmd}</code>
         </div>
-        <button class="btn btn-error btn-xs" on:click={() => stopCommand(project.id)}>
+        <Button variant="destructive" size="sm" class="h-7 px-3" onclick={() => stopCommand(project.id)}>
+          <Square class="h-3 w-3 mr-1" />
           {$_('stop')}
-        </button>
+        </Button>
       </div>
     {/if}
 
     <LogViewer {projectLogs} />
   </div>
 
-  <div class="mt-4 border-t border-base-300 pt-4 flex flex-col space-y-2 flex-none">
-    <div class="flex items-center justify-between">
-      <span class="text-[10px] font-black uppercase opacity-50 tracking-widest">{$_('customCommand')}</span>
-      {#if recentCommands.length > 0}
-        <div class="flex gap-1 overflow-x-auto pb-1 max-w-[70%]">
-          {#each recentCommands as cmd}
-            <button
-              class="btn btn-ghost btn-xs text-[10px] lowercase font-mono opacity-40 hover:opacity-100 truncate max-w-[120px]"
-              on:click={() => customCommand = cmd}
-            >
-              {cmd}
-            </button>
-          {/each}
+  <!-- Footer / Custom Command -->
+  <footer class="p-4 border-t bg-card">
+    <div class="flex flex-col gap-2">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2 text-muted-foreground">
+          <Terminal class="h-3 w-3" />
+          <span class="text-[10px] font-bold uppercase tracking-widest">{$_('customCommand')}</span>
         </div>
-      {/if}
+        {#if recentCommands.length > 0}
+          <div class="flex items-center gap-2">
+            <History class="h-3 w-3 text-muted-foreground/50" />
+            <div class="flex gap-1">
+              {#each recentCommands as cmd}
+                <button
+                  class="text-[10px] font-mono px-2 py-0.5 rounded hover:bg-muted transition-colors opacity-60 hover:opacity-100"
+                  onclick={() => customCommand = cmd}
+                >
+                  {cmd}
+                </button>
+              {/each}
+            </div>
+          </div>
+        {/if}
+      </div>
+      <div class="flex gap-2">
+        <Input
+          bind:value={customCommand}
+          placeholder="e.g. npm install -D tauri-icon"
+          class="font-mono text-xs h-8"
+          onkeydown={(e) => e.key === 'Enter' && handleCustomCommand()}
+        />
+        <Button size="sm" class="h-8 px-4" disabled={isRunning || !customCommand.trim()} onclick={handleCustomCommand}>
+          {$_('run')}
+        </Button>
+      </div>
     </div>
-    <div class="join w-full">
-      <input
-        type="text"
-        bind:value={customCommand}
-        placeholder="npm install -g tauri-icon..."
-        class="input input-bordered input-sm join-item flex-1 font-mono text-xs focus:input-primary transition-all"
-        on:keydown={(e) => e.key === 'Enter' && handleCustomCommand()}
-      />
-      <button
-        class="btn btn-primary btn-sm join-item px-6"
-        disabled={isRunning || !customCommand.trim()}
-        on:click={handleCustomCommand}
-      >
-        {$_('run')}
-      </button>
-    </div>
-  </div>
+  </footer>
 </div>
