@@ -39,7 +39,11 @@
         { "name": "yarn.cmd", "cmd": "yarn.cmd", "args": true },
         { "name": "bun", "cmd": "bun", "args": true },
         { "name": "bun.exe", "cmd": "bun.exe", "args": true },
-        { "name": "git", "cmd": "git", "args": true }
+        { "name": "git", "cmd": "git", "args": true },
+        { "name": "code", "cmd": "code", "args": true },
+        { "name": "code.cmd", "cmd": "code.cmd", "args": true },
+        { "name": "npx", "cmd": "npx", "args": true },
+        { "name": "npx.cmd", "cmd": "npx.cmd", "args": true }
       ]
     }
   ]

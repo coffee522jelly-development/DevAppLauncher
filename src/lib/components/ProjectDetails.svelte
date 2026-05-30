@@ -1,5 +1,6 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
+  import { revealItemInDir } from '@tauri-apps/plugin-opener';
   import type { Project } from '../types';
   import { runCommand, stopCommand, runningProcesses, runningCommands, logs, appendLog } from '../stores/commands';
   import LogViewer from './LogViewer.svelte';
@@ -77,6 +78,28 @@
     }
     runCommand(project.id, project.path, 'git', ['push', 'origin', 'HEAD'], mask);
   }
+
+  function handleOpenFolder() {
+    revealItemInDir(project.path);
+  }
+
+  function handleOpenVSCode() {
+    runCommand(project.id, project.path, 'code', ['.']);
+  }
+
+  function handleAuditFix() {
+    const args = project.packageManager === 'npm' ? ['audit', 'fix'] : ['audit'];
+    runCommand(project.id, project.path, project.packageManager, args);
+  }
+
+  function handleCheckUpdates() {
+    const args = project.packageManager === 'npm' ? ['outdated'] : ['outdated'];
+    runCommand(project.id, project.path, project.packageManager, args);
+  }
+
+  function handlePreview() {
+    runCommand(project.id, project.path, 'npx', ['serve', 'build', '-p', '5000']);
+  }
 </script>
 
 <div class="flex flex-col h-full p-6 space-y-6 overflow-hidden bg-base-100 text-base-content">
@@ -85,6 +108,14 @@
       <div class="flex items-center space-x-3">
         <h1 class="text-2xl font-bold">{project.name}</h1>
         <div class="badge badge-primary badge-outline">{project.packageManager}</div>
+      </div>
+      <div class="flex items-center gap-2">
+        <button class="btn btn-ghost btn-sm tooltip tooltip-left" data-tip={$_('openVSCode')} on:click={handleOpenVSCode}>
+          <span class="text-xl">⌨️</span>
+        </button>
+        <button class="btn btn-ghost btn-sm tooltip tooltip-left" data-tip={$_('openFolder')} on:click={handleOpenFolder}>
+          <span class="text-xl">📂</span>
+        </button>
       </div>
     </div>
     <div class="text-xs opacity-50 mt-1 font-mono bg-base-200 p-1 rounded inline-block truncate">
@@ -160,6 +191,20 @@
           on:click={handleGitPush}
         >
           ⬆️ {$_('gitPush')}
+        </button>
+      </div>
+
+      <div class="divider divider-horizontal mx-0"></div>
+
+      <div class="join">
+        <button class="btn btn-sm btn-neutral join-item" disabled={isRunning} on:click={handleAuditFix} title="audit fix">
+          🛡️ Audit
+        </button>
+        <button class="btn btn-sm btn-neutral join-item" disabled={isRunning} on:click={handleCheckUpdates} title="outdated">
+          🆙 Updates
+        </button>
+        <button class="btn btn-sm btn-neutral join-item" disabled={isRunning} on:click={handlePreview} title="npx serve">
+          🌐 Preview
         </button>
       </div>
     </div>

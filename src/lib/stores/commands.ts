@@ -23,8 +23,8 @@ export async function runCommand(projectId: string, cwd: string, program: string
   let actualProgram = program;
   const isWindows = type() === 'windows';
   if (isWindows) {
-    if (['npm', 'pnpm', 'yarn', 'git'].includes(program)) {
-      actualProgram = program === 'git' ? 'git' : `${program}.cmd`;
+    if (['npm', 'pnpm', 'yarn', 'git', 'code', 'npx'].includes(program)) {
+      actualProgram = (program === 'git') ? 'git' : `${program}.cmd`;
     } else if (program === 'bun') {
       actualProgram = `${program}.exe`;
     }

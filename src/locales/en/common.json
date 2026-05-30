@@ -18,5 +18,7 @@
   "gitClone": "Clone",
   "gitPush": "Push",
   "gitServerExample": "Example: https://github.com/my-org (Use PAT for GitHub)",
-  "theme": "Theme"
+  "theme": "Theme",
+  "openFolder": "Open in File Explorer",
+  "openVSCode": "Open in VS Code"
 }
