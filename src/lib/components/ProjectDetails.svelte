@@ -132,7 +132,7 @@
 
 <div class="flex flex-col h-full bg-background text-foreground overflow-hidden">
   <!-- Header -->
-  <header class="p-6 border-b bg-card/50">
+  <header class="p-6 border-b bg-card">
     <div class="flex items-center justify-between">
       <div class="space-y-1">
         <div class="flex items-center gap-3">
@@ -158,7 +158,7 @@
   </header>
 
   <!-- Toolbar -->
-  <div class="px-6 py-4 bg-muted/20 border-b flex flex-wrap gap-4 items-center">
+  <div class="px-6 py-4 bg-muted border-b flex flex-wrap gap-4 items-center">
     <div class="flex items-center gap-2">
       <Button size="sm" class="gap-2" disabled={isRunning} onclick={handleInstall}>
         <Download class="h-4 w-4" />
@@ -223,7 +223,7 @@
   <!-- Content Area (Logs) -->
   <div class="flex-1 min-h-0 flex flex-col relative bg-zinc-950">
     {#if isRunning}
-      <div class="absolute top-4 right-4 z-20 flex items-center gap-4 bg-zinc-900/90 backdrop-blur border border-zinc-800 p-2 rounded-lg shadow-2xl">
+      <div class="absolute top-4 right-4 z-20 flex items-center gap-4 bg-zinc-900 border border-zinc-800 p-2 rounded-lg shadow-2xl">
         <div class="flex items-center gap-2 px-2">
           <span class="relative flex h-2 w-2">
             <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-75"></span>
