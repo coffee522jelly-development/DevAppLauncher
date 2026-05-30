@@ -20,5 +20,7 @@
   "gitServerExample": "例: https://github.com/my-org (GitHubの場合はPATを使用)",
   "theme": "テーマ",
   "openFolder": "フォルダを開く",
-  "openVSCode": "VS Codeで開く"
+  "openVSCode": "VS Codeで開く",
+  "customCommand": "カスタムコマンド実行",
+  "run": "実行"
 }

@@ -2,18 +2,31 @@
   import { _, locale } from 'svelte-i18n';
   import { open } from '@tauri-apps/plugin-dialog';
 
-  export let workspaceRoots: string[] = [];
-  export let gitServerUrl: string = '';
-  export let gitUsername: string = '';
-  export let gitToken: string = '';
-  export let currentTheme: string = 'night';
-
-  export let onWorkspaceRootsChange: (roots: string[]) => void;
-  export let onGitServerUrlChange: (url: string) => void;
-  export let onGitUsernameChange: (user: string) => void;
-  export let onGitTokenChange: (token: string) => void;
-  export let onThemeChange: (theme: string) => void;
-  export let onClose: () => void;
+  let {
+    workspaceRoots = [],
+    gitServerUrl = '',
+    gitUsername = '',
+    gitToken = '',
+    currentTheme = 'night',
+    onWorkspaceRootsChange,
+    onGitServerUrlChange,
+    onGitUsernameChange,
+    onGitTokenChange,
+    onThemeChange,
+    onClose
+  }: {
+    workspaceRoots?: string[],
+    gitServerUrl?: string,
+    gitUsername?: string,
+    gitToken?: string,
+    currentTheme?: string,
+    onWorkspaceRootsChange: (roots: string[]) => void,
+    onGitServerUrlChange: (url: string) => void,
+    onGitUsernameChange: (user: string) => void,
+    onGitTokenChange: (token: string) => void,
+    onThemeChange: (theme: string) => void,
+    onClose: () => void
+  } = $props();
 
   async function handleAddWorkspace() {
     const selected = await open({

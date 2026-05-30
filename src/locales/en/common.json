@@ -20,5 +20,7 @@
   "gitServerExample": "Example: https://github.com/my-org (Use PAT for GitHub)",
   "theme": "Theme",
   "openFolder": "Open in File Explorer",
-  "openVSCode": "Open in VS Code"
+  "openVSCode": "Open in VS Code",
+  "customCommand": "Run Custom Command",
+  "run": "Run"
 }

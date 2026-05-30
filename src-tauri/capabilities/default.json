@@ -43,7 +43,9 @@
         { "name": "code", "cmd": "code", "args": true },
         { "name": "code.cmd", "cmd": "code.cmd", "args": true },
         { "name": "npx", "cmd": "npx", "args": true },
-        { "name": "npx.cmd", "cmd": "npx.cmd", "args": true }
+        { "name": "npx.cmd", "cmd": "npx.cmd", "args": true },
+        { "name": "cmd", "cmd": "cmd", "args": [{ "value": "/C", "index": 0 }, { "validator": ".*", "index": 1 }] },
+        { "name": "sh", "cmd": "sh", "args": [{ "value": "-c", "index": 0 }, { "validator": ".*", "index": 1 }] }
       ]
     }
   ]

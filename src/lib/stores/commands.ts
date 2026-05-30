@@ -104,6 +104,14 @@ export async function runCommand(projectId: string, cwd: string, program: string
   }
 }
 
+export async function runCustomCommand(projectId: string, cwd: string, commandLine: string) {
+  const isWindows = type() === 'windows';
+  const program = isWindows ? 'cmd' : 'sh';
+  const args = isWindows ? ['/C', commandLine] : ['-c', commandLine];
+
+  await runCommand(projectId, cwd, program, args);
+}
+
 export async function stopCommand(projectId: string) {
   const processes = get(runningProcesses);
   const child = processes[projectId];

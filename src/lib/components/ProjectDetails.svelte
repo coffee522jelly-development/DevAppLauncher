@@ -2,18 +2,20 @@
   import { _ } from 'svelte-i18n';
   import { revealItemInDir } from '@tauri-apps/plugin-opener';
   import type { Project } from '../types';
-  import { runCommand, stopCommand, runningProcesses, runningCommands, logs, appendLog } from '../stores/commands';
+  import { runCommand, runCustomCommand, stopCommand, runningProcesses, runningCommands, logs, appendLog } from '../stores/commands';
   import LogViewer from './LogViewer.svelte';
 
-  export let project: Project;
-  export let gitServerUrl: string = '';
-  export let gitUsername: string = '';
-  export let gitToken: string = '';
+  let { project, gitServerUrl = '', gitUsername = '', gitToken = '' }: {
+    project: Project,
+    gitServerUrl?: string,
+    gitUsername?: string,
+    gitToken?: string
+  } = $props();
 
-  $: isRunning = !!$runningProcesses[project.id];
-  $: runningCmd = $runningCommands[project.id];
-  $: projectLogs = $logs[project.id] || [];
-  $: hasScripts = Object.keys(project.scripts).length > 0;
+  let isRunning = $derived(!!$runningProcesses[project.id]);
+  let runningCmd = $derived($runningCommands[project.id]);
+  let projectLogs = $derived($logs[project.id] || []);
+  let hasScripts = $derived(Object.keys(project.scripts).length > 0);
 
   function handleInstall() {
     const cmd = project.packageManager;
@@ -99,6 +101,21 @@
 
   function handlePreview() {
     runCommand(project.id, project.path, 'npx', ['serve', 'build', '-p', '5000']);
+  }
+
+  let customCommand = $state('');
+  let recentCommands: string[] = $state(JSON.parse(localStorage.getItem(`recent_${project.id}`) || '[]'));
+
+  function handleCustomCommand() {
+    if (!customCommand.trim()) return;
+
+    runCustomCommand(project.id, project.path, customCommand);
+
+    // Update history
+    const updated = [customCommand, ...recentCommands.filter(c => c !== customCommand)].slice(0, 5);
+    recentCommands = updated;
+    localStorage.setItem(`recent_${project.id}`, JSON.stringify(updated));
+    customCommand = '';
   }
 </script>
 
@@ -227,5 +244,39 @@
     {/if}
 
     <LogViewer {projectLogs} />
+  </div>
+
+  <div class="mt-4 border-t border-base-300 pt-4 flex flex-col space-y-2 flex-none">
+    <div class="flex items-center justify-between">
+      <span class="text-[10px] font-black uppercase opacity-50 tracking-widest">{$_('customCommand')}</span>
+      {#if recentCommands.length > 0}
+        <div class="flex gap-1 overflow-x-auto pb-1 max-w-[70%]">
+          {#each recentCommands as cmd}
+            <button
+              class="btn btn-ghost btn-xs text-[10px] lowercase font-mono opacity-40 hover:opacity-100 truncate max-w-[120px]"
+              on:click={() => customCommand = cmd}
+            >
+              {cmd}
+            </button>
+          {/each}
+        </div>
+      {/if}
+    </div>
+    <div class="join w-full">
+      <input
+        type="text"
+        bind:value={customCommand}
+        placeholder="npm install -g tauri-icon..."
+        class="input input-bordered input-sm join-item flex-1 font-mono text-xs focus:input-primary transition-all"
+        on:keydown={(e) => e.key === 'Enter' && handleCustomCommand()}
+      />
+      <button
+        class="btn btn-primary btn-sm join-item px-6"
+        disabled={isRunning || !customCommand.trim()}
+        on:click={handleCustomCommand}
+      >
+        {$_('run')}
+      </button>
+    </div>
   </div>
 </div>

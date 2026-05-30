@@ -2,13 +2,21 @@
   import { _ } from 'svelte-i18n';
   import type { Project } from '../types';
 
-  export let projects: Project[] = [];
-  export let selectedProjectId: string | undefined;
-  export let isScanning = false;
-
-  export let onSelectProject: (id: string) => void;
-  export let onRefresh: () => void;
-  export let onOpenSettings: () => void;
+  let {
+    projects = [],
+    selectedProjectId,
+    isScanning = false,
+    onSelectProject,
+    onRefresh,
+    onOpenSettings
+  }: {
+    projects?: Project[],
+    selectedProjectId?: string,
+    isScanning?: boolean,
+    onSelectProject: (id: string) => void,
+    onRefresh: () => void,
+    onOpenSettings: () => void
+  } = $props();
 </script>
 
 <div class="w-64 bg-base-200 border-r border-base-300 flex flex-col h-full overflow-hidden shadow-lg z-10">
