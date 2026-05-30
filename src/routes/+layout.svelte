@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { Toaster } from "$lib/components/ui/sonner";
+	import { ModeWatcher } from "mode-watcher";
 	let { children } = $props();
 	import "../app.css";
 
@@ -26,4 +28,6 @@
 	});
 </script>
 
+<ModeWatcher />
+<Toaster />
 {@render children()}

@@ -19,6 +19,7 @@
   import { Label } from './ui/label';
   import { Separator } from './ui/separator';
   import { ScrollArea } from './ui/scroll-area';
+  import * as Select from './ui/select';
   import { cn } from '$lib/utils';
 
   let {
@@ -176,20 +177,22 @@
             <Palette class="h-4 w-4" />
             <h3 class="text-sm uppercase tracking-wider">{$_('theme')}</h3>
           </div>
-          <div class="relative group">
-            <select
-              class="w-full bg-background border rounded-md h-9 px-3 text-sm font-medium appearance-none focus:ring-1 focus:ring-primary outline-none cursor-pointer"
-              value={currentTheme}
-              onchange={(e) => onThemeChange(e.currentTarget.value)}
-            >
-              {#each themes as theme}
-                <option value={theme}>{theme.charAt(0).toUpperCase() + theme.slice(1)}</option>
-              {/each}
-            </select>
-            <div class="absolute right-3 top-2.5 pointer-events-none opacity-50">
-              <LayoutGrid class="h-4 w-4" />
-            </div>
-          </div>
+          <Select.Root
+            type="single"
+            value={currentTheme}
+            onValueChange={(v: string) => v && onThemeChange(v)}
+          >
+            <Select.Trigger class="w-full">
+              <Select.SelectValue placeholder="Select a theme" />
+            </Select.Trigger>
+            <Select.SelectContent>
+              <ScrollArea class="h-48">
+                {#each themes as theme}
+                  <Select.SelectItem value={theme}>{theme.charAt(0).toUpperCase() + theme.slice(1)}</Select.SelectItem>
+                {/each}
+              </ScrollArea>
+            </Select.SelectContent>
+          </Select.Root>
         </div>
       </section>
     </div>

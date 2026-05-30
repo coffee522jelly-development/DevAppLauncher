@@ -23,7 +23,9 @@
     "bits-ui": "^2.18.1",
     "clsx": "^2.1.1",
     "lucide-svelte": "^1.0.1",
+    "mode-watcher": "^1.1.0",
     "svelte-i18n": "^4.0.1",
+    "svelte-sonner": "^1.1.1",
     "tailwind-merge": "^3.6.0",
     "tailwind-variants": "^3.2.2"
   },
@@ -37,6 +39,7 @@
     "autoprefixer": "^10.5.0",
     "daisyui": "^5.5.20",
     "postcss": "^8.5.15",
+    "shadcn-svelte": "^1.3.0",
     "svelte": "^5.0.0",
     "svelte-check": "^4.0.0",
     "tailwindcss": "^4.3.0",
