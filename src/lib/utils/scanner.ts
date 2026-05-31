@@ -21,18 +21,23 @@ async function createProjectFromPath(path: string): Promise<Project> {
   try {
     const packageJsonPath = await join(path, 'package.json');
     const hasPackageJson = await exists(packageJsonPath);
-    console.log(`- has package.json: ${hasPackageJson}`);
+    console.log(`- checking package.json at: ${packageJsonPath} (${hasPackageJson})`);
 
     if (hasPackageJson) {
-      const content = await readTextFile(packageJsonPath);
-      const pkg = JSON.parse(content);
-      scripts = pkg.scripts || {};
-      packageManager = await detectPackageManager(path);
-      console.log(`- package manager: ${packageManager}, scripts count: ${Object.keys(scripts).length}`);
+      try {
+        const content = await readTextFile(packageJsonPath);
+        const pkg = JSON.parse(content);
+        scripts = pkg.scripts || {};
+        packageManager = await detectPackageManager(path);
+        console.log(`- package manager: ${packageManager}, scripts count: ${Object.keys(scripts).length}`);
+      } catch (parseError) {
+        console.error(`- Failed to parse package.json at ${packageJsonPath}:`, parseError);
+      }
     }
 
     const tauriDirPath = await join(path, 'src-tauri');
     isTauri = await exists(tauriDirPath);
+    console.log(`- is tauri project: ${isTauri}`);
   } catch (e) {
     console.error(`Error processing project at ${path}:`, e);
   }

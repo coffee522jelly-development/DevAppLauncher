@@ -14,7 +14,8 @@
     Keyboard,
     Folder,
     Terminal,
-    History
+    History,
+    RefreshCw
   } from 'lucide-svelte';
   import type { Project } from '../types';
   import { runCommand, runCustomCommand, stopCommand, runningProcesses, runningCommands, logs, appendLog } from '../stores/commands';
@@ -26,11 +27,12 @@
   import { ScrollArea } from './ui/scroll-area';
   import * as Tooltip from './ui/tooltip';
 
-  let { project, gitServerUrl = '', gitUsername = '', gitToken = '' }: {
+  let { project, gitServerUrl = '', gitUsername = '', gitToken = '', onRefresh }: {
     project: Project,
     gitServerUrl?: string,
     gitUsername?: string,
-    gitToken?: string
+    gitToken?: string,
+    onRefresh: () => void
   } = $props();
 
   let isRunning = $derived(!!$runningProcesses[project.id]);
@@ -151,6 +153,9 @@
         </p>
       </div>
       <div class="flex items-center gap-2">
+        <Button variant="ghost" size="icon" onclick={onRefresh} title={$_('refreshProjects')}>
+          <RefreshCw class="h-5 w-5" />
+        </Button>
         <Button variant="ghost" size="icon" onclick={handleOpenVSCode} title={$_('openVSCode')}>
           <Keyboard class="h-5 w-5" />
         </Button>

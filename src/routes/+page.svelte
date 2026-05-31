@@ -63,15 +63,19 @@
   });
 
   onMount(() => {
-    console.log('App mounted. Triggering initial scan.');
-    handleRefresh();
+    console.log('App mounted. Triggering initial scan in 200ms.');
+    // Small delay to ensure Tauri APIs are ready
+    const timer = setTimeout(() => {
+      handleRefresh();
+    }, 200);
+    return () => clearTimeout(timer);
   });
 
-  // Scan effect - only runs when workspaceRoots change
+  // Scan effect - only runs when workspaceRoots change length (add/remove)
   $effect(() => {
-    // Access workspaceRoots to establish dependency
-    if (workspaceRoots.length > 0) {
-      console.log('Workspace roots changed. Re-scanning.');
+    const rootCount = workspaceRoots.length;
+    if (rootCount > 0) {
+      console.log(`Workspace count changed to ${rootCount}. Re-scanning.`);
       handleRefresh();
     }
   });
@@ -121,6 +125,7 @@
             {gitServerUrl}
             {gitUsername}
             {gitToken}
+            onRefresh={handleRefresh}
           />
         {:else}
           <div class="h-full flex items-center justify-center text-base-content/30 italic">
