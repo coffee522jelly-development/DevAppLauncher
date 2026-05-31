@@ -12,6 +12,7 @@ async function detectPackageManager(projectPath: string): Promise<PackageManager
 }
 
 async function createProjectFromPath(path: string): Promise<Project> {
+  console.log(`Scanning project path: ${path}`);
   const folderName = path.split(/[/\\]/).filter(Boolean).pop() || 'unnamed';
   let scripts: Record<string, string> = {};
   let packageManager: PackageManager = 'npm';
@@ -20,12 +21,14 @@ async function createProjectFromPath(path: string): Promise<Project> {
   try {
     const packageJsonPath = await join(path, 'package.json');
     const hasPackageJson = await exists(packageJsonPath);
+    console.log(`- has package.json: ${hasPackageJson}`);
 
     if (hasPackageJson) {
       const content = await readTextFile(packageJsonPath);
       const pkg = JSON.parse(content);
       scripts = pkg.scripts || {};
       packageManager = await detectPackageManager(path);
+      console.log(`- package manager: ${packageManager}, scripts count: ${Object.keys(scripts).length}`);
     }
 
     const tauriDirPath = await join(path, 'src-tauri');

@@ -15,11 +15,12 @@
   let gitToken: string = $state(localStorage.getItem('gitToken') || '');
   let currentTheme: string = $state(localStorage.getItem('theme') || 'night');
   let projects: Project[] = $state([]);
-  let selectedProjectId: string | undefined = $state();
+  let selectedProjectId: string | undefined = $state(localStorage.getItem('selectedProjectId') || undefined);
   let showSettings = $state(false);
   let isScanning = $state(false);
 
   async function handleRefresh() {
+    console.log('Starting workspace scan...', { roots: workspaceRoots });
     if (workspaceRoots.length === 0) {
       projects = [];
       return;
@@ -36,6 +37,7 @@
         (project, index, self) =>
           index === self.findIndex((p) => p.id === project.id)
       );
+      console.log('Scan complete. Detected projects:', projects.map(p => ({ name: p.name, hasScripts: !!Object.keys(p.scripts).length })));
 
       if (projects.length > 0 && !selectedProjectId) {
         selectedProjectId = projects[0].id;
@@ -54,14 +56,24 @@
     localStorage.setItem('gitUsername', gitUsername);
     localStorage.setItem('gitToken', gitToken);
     localStorage.setItem('theme', currentTheme);
+    if (selectedProjectId) {
+      localStorage.setItem('selectedProjectId', selectedProjectId);
+    }
     window.dispatchEvent(new CustomEvent('theme-change', { detail: { theme: currentTheme } }));
+  });
+
+  onMount(() => {
+    console.log('App mounted. Triggering initial scan.');
+    handleRefresh();
   });
 
   // Scan effect - only runs when workspaceRoots change
   $effect(() => {
     // Access workspaceRoots to establish dependency
-    const _roots = workspaceRoots;
-    handleRefresh();
+    if (workspaceRoots.length > 0) {
+      console.log('Workspace roots changed. Re-scanning.');
+      handleRefresh();
+    }
   });
 
   async function handleSelectWorkspace() {
