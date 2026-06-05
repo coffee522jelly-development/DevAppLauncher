@@ -9,6 +9,8 @@
 		size = "default",
 		builders = [],
 		children,
+		onclick,
+		disabled = false,
 		...rest
 	}: {
 		class?: string;
@@ -16,12 +18,16 @@
 		size?: Size;
 		builders?: any[];
 		children?: import("svelte").Snippet;
+		onclick?: (e: MouseEvent) => void;
+		disabled?: boolean;
 	} & any = $props();
 </script>
 
 <ButtonPrimitive.Root
 	class={cn(buttonVariants({ variant, size, className }))}
 	{builders}
+	{onclick}
+	{disabled}
 	{...rest}
 >
 	{@render children?.()}

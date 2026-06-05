@@ -24,8 +24,7 @@
   import { Badge } from './ui/badge';
   import { Input } from './ui/input';
   import { Separator } from './ui/separator';
-  import { ScrollArea } from './ui/scroll-area';
-  import * as Tooltip from './ui/tooltip';
+  import { Card, CardContent, CardHeader } from './ui/card';
 
   let { project, gitServerUrl = '', gitUsername = '', gitToken = '', onRefresh }: {
     project: Project,
@@ -148,7 +147,7 @@
             <Badge variant="secondary" class="font-bold">TAURI</Badge>
           {/if}
         </div>
-        <p class="text-xs text-muted-foreground font-mono bg-muted/50 px-2 py-1 rounded inline-block">
+        <p class="text-xs text-muted-foreground font-mono bg-muted px-2 py-1 rounded inline-block">
           {project.path}
         </p>
       </div>
@@ -167,7 +166,7 @@
   </header>
 
   <!-- Toolbar -->
-  <div class="px-6 py-4 bg-muted border-b flex flex-wrap gap-4 items-center">
+  <div class="px-6 py-4 bg-muted border-b flex flex-wrap gap-4 items-center shrink-0">
     <div class="flex items-center gap-2">
       <Button size="sm" class="gap-2" disabled={isRunning} onclick={handleInstall}>
         <Download class="h-4 w-4" />
@@ -252,7 +251,7 @@
   </div>
 
   <!-- Footer / Custom Command -->
-  <footer class="p-4 border-t bg-card">
+  <footer class="p-4 border-t bg-card shrink-0">
     <div class="flex flex-col gap-2">
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-2 text-muted-foreground">

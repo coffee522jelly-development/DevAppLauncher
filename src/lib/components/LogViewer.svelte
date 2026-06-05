@@ -1,8 +1,7 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import { Terminal, Clock, CheckCircle2, AlertCircle } from 'lucide-svelte';
+  import { Terminal } from 'lucide-svelte';
   import type { CommandLog } from '../types';
-  import { ScrollArea } from './ui/scroll-area';
   import { cn } from '$lib/utils';
 
   let { projectLogs }: { projectLogs: CommandLog[] } = $props();
@@ -17,7 +16,7 @@
 </script>
 
 <div class="flex-1 flex flex-col min-h-0 bg-zinc-950 font-mono text-sm selection:bg-sky-500/30">
-  <div class="flex items-center gap-2 px-4 py-2 bg-zinc-900/50 border-b border-zinc-800 text-[10px] text-zinc-500 font-bold uppercase tracking-widest">
+  <div class="flex items-center gap-2 px-4 py-2 bg-zinc-900 border-b border-zinc-800 text-[10px] text-zinc-500 font-bold uppercase tracking-widest shrink-0">
     <Terminal class="h-3 w-3" />
     <span>Console Output</span>
   </div>

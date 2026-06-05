@@ -18,8 +18,7 @@
   import { Input } from './ui/input';
   import { Label } from './ui/label';
   import { Separator } from './ui/separator';
-  import { ScrollArea } from './ui/scroll-area';
-  import * as Select from './ui/select';
+  import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
   import { cn } from '$lib/utils';
 
   let {
@@ -77,22 +76,13 @@
   ];
 </script>
 
-<div class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-hidden">
-  <div class="fixed inset-0 bg-black/70" aria-hidden="true" onclick={onClose}></div>
+<Dialog open={true} onOpenChange={(open: boolean) => !open && onClose()}>
+  <DialogContent class="max-w-2xl max-h-[90vh] flex flex-col p-0 overflow-hidden">
+    <DialogHeader class="p-6 border-b shrink-0">
+      <DialogTitle class="text-2xl font-bold tracking-tight">{$_('settings')}</DialogTitle>
+      <p class="text-sm text-muted-foreground italic">Customize your DevAppLauncher experience.</p>
+    </DialogHeader>
 
-  <div class="relative w-full max-w-2xl max-h-[90vh] bg-background text-foreground border rounded-xl shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-150">
-    <!-- Header -->
-    <div class="flex items-center justify-between p-6 border-b shrink-0">
-      <div class="space-y-1">
-        <h2 class="text-2xl font-bold tracking-tight">{$_('settings')}</h2>
-        <p class="text-sm text-muted-foreground italic">Customize your DevAppLauncher experience.</p>
-      </div>
-      <Button variant="ghost" size="icon" class="rounded-full" onclick={onClose}>
-        <X class="h-5 w-5" />
-      </Button>
-    </div>
-
-    <!-- Scrollable Content -->
     <div class="flex-1 overflow-y-auto p-6 space-y-8">
       <!-- Workspaces Section -->
       <section class="space-y-4">
@@ -136,7 +126,7 @@
             <Label for="git-url" class="flex items-center gap-2 opacity-70">
               <Server class="h-3 w-3" /> {$_('gitServerUrl')}
             </Label>
-            <Input id="git-url" placeholder="https://github.com/my-org" value={gitServerUrl} oninput={(e) => onGitServerUrlChange(e.currentTarget.value)} />
+            <Input id="git-url" placeholder="https://github.com/my-org" value={gitServerUrl} oninput={(e: any) => onGitServerUrlChange(e.currentTarget.value)} />
             <p class="text-[10px] text-muted-foreground italic px-1">{$_('gitServerExample')}</p>
           </div>
 
@@ -145,13 +135,13 @@
               <Label for="git-user" class="flex items-center gap-2 opacity-70">
                 <User class="h-3 w-3" /> {$_('gitUsername')}
               </Label>
-              <Input id="git-user" placeholder="Username" value={gitUsername} oninput={(e) => onGitUsernameChange(e.currentTarget.value)} />
+              <Input id="git-user" placeholder="Username" value={gitUsername} oninput={(e: any) => onGitUsernameChange(e.currentTarget.value)} />
             </div>
             <div class="grid gap-2">
               <Label for="git-token" class="flex items-center gap-2 opacity-70">
                 <Key class="h-3 w-3" /> {$_('gitToken')}
               </Label>
-              <Input id="git-token" type="password" placeholder="PAT" value={gitToken} oninput={(e) => onGitTokenChange(e.currentTarget.value)} />
+              <Input id="git-token" type="password" placeholder="PAT" value={gitToken} oninput={(e: any) => onGitTokenChange(e.currentTarget.value)} />
             </div>
           </div>
         </div>
@@ -177,32 +167,24 @@
             <Palette class="h-4 w-4" />
             <h3 class="text-sm uppercase tracking-wider">{$_('theme')}</h3>
           </div>
-          <Select.Root
-            type="single"
+          <select
+            class="w-full bg-background border rounded-md h-9 px-3 text-sm font-medium focus:ring-1 focus:ring-primary outline-none cursor-pointer"
             value={currentTheme}
-            onValueChange={(v: string) => v && onThemeChange(v)}
+            onchange={(e: any) => onThemeChange(e.currentTarget.value)}
           >
-            <Select.Trigger class="w-full">
-              <Select.SelectValue placeholder="Select a theme" />
-            </Select.Trigger>
-            <Select.SelectContent>
-              <ScrollArea class="h-48">
-                {#each themes as theme}
-                  <Select.SelectItem value={theme}>{theme.charAt(0).toUpperCase() + theme.slice(1)}</Select.SelectItem>
-                {/each}
-              </ScrollArea>
-            </Select.SelectContent>
-          </Select.Root>
+            {#each themes as theme}
+              <option value={theme}>{theme.charAt(0).toUpperCase() + theme.slice(1)}</option>
+            {/each}
+          </select>
         </div>
       </section>
     </div>
 
-    <!-- Footer -->
     <div class="p-6 border-t bg-muted/20 flex justify-end shrink-0">
       <Button variant="default" class="px-8" onclick={onClose}>
         <Check class="h-4 w-4 mr-2" />
         Done
       </Button>
     </div>
-  </div>
-</div>
+  </DialogContent>
+</Dialog>

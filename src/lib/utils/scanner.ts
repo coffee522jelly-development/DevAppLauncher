@@ -53,12 +53,32 @@ async function createProjectFromPath(path: string): Promise<Project> {
 }
 
 export async function scanWorkspace(rootPath: string): Promise<Project[]> {
+  console.log(`Starting workspace scan at: ${rootPath}`);
+  const projects: Project[] = [];
+
   try {
-    // Only return the root path as a project.
-    // This simplifies the UI to only show explicitly added workspace roots.
-    return [await createProjectFromPath(rootPath)];
+    // 1. Check if the root path itself is a project
+    const rootProject = await createProjectFromPath(rootPath);
+    if (Object.keys(rootProject.scripts).length > 0) {
+      projects.push(rootProject);
+    }
+
+    // 2. Scan immediate subdirectories
+    const entries = await readDir(rootPath);
+    for (const entry of entries) {
+      if (entry.isDirectory && !IGNORED_DIRS.includes(entry.name)) {
+        const subPath = await join(rootPath, entry.name);
+        const subProject = await createProjectFromPath(subPath);
+        // Only add if it actually has scripts (valid Node.js project)
+        if (Object.keys(subProject.scripts).length > 0) {
+          projects.push(subProject);
+        }
+      }
+    }
   } catch (e) {
     console.error(`Failed to scan workspace ${rootPath}`, e);
-    return [];
   }
+
+  console.log(`Scan finished for ${rootPath}. Found ${projects.length} valid project(s).`);
+  return projects;
 }
