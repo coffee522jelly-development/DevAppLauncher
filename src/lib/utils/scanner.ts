@@ -12,14 +12,17 @@ async function detectPackageManager(projectPath: string): Promise<PackageManager
 }
 
 async function createProjectFromPath(path: string): Promise<Project> {
-  console.log(`Scanning project path: ${path}`);
-  const folderName = path.split(/[/\\]/).filter(Boolean).pop() || 'unnamed';
+  // Normalize path format for robustness
+  const normalizedPath = path.replace(/\\/g, '/');
+  console.log(`Scanning project path: ${normalizedPath}`);
+
+  const folderName = normalizedPath.split('/').filter(Boolean).pop() || 'unnamed';
   let scripts: Record<string, string> = {};
   let packageManager: PackageManager = 'npm';
   let isTauri = false;
 
   try {
-    const packageJsonPath = await join(path, 'package.json');
+    const packageJsonPath = await join(normalizedPath, 'package.json');
     const hasPackageJson = await exists(packageJsonPath);
     console.log(`- checking package.json at: ${packageJsonPath} (${hasPackageJson})`);
 
@@ -43,9 +46,9 @@ async function createProjectFromPath(path: string): Promise<Project> {
   }
 
   return {
-    id: path,
+    id: normalizedPath,
     name: folderName, // Prioritize folder name
-    path: path,
+    path: normalizedPath,
     packageManager,
     scripts,
     isTauri,
@@ -53,21 +56,22 @@ async function createProjectFromPath(path: string): Promise<Project> {
 }
 
 export async function scanWorkspace(rootPath: string): Promise<Project[]> {
-  console.log(`Starting workspace scan at: ${rootPath}`);
+  const normalizedRoot = rootPath.replace(/\\/g, '/');
+  console.log(`Starting workspace scan at: ${normalizedRoot}`);
   const projects: Project[] = [];
 
   try {
     // 1. Check if the root path itself is a project
-    const rootProject = await createProjectFromPath(rootPath);
+    const rootProject = await createProjectFromPath(normalizedRoot);
     if (Object.keys(rootProject.scripts).length > 0) {
       projects.push(rootProject);
     }
 
     // 2. Scan immediate subdirectories
-    const entries = await readDir(rootPath);
+    const entries = await readDir(normalizedRoot);
     for (const entry of entries) {
       if (entry.isDirectory && !IGNORED_DIRS.includes(entry.name)) {
-        const subPath = await join(rootPath, entry.name);
+        const subPath = await join(normalizedRoot, entry.name);
         const subProject = await createProjectFromPath(subPath);
         // Only add if it actually has scripts (valid Node.js project)
         if (Object.keys(subProject.scripts).length > 0) {

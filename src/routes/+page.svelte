@@ -22,6 +22,7 @@
   async function handleRefresh() {
     console.log('Starting workspace scan...', { roots: workspaceRoots });
     if (workspaceRoots.length === 0) {
+      console.log('No workspace roots configured. Clearing projects.');
       projects = [];
       return;
     }
@@ -29,15 +30,23 @@
     try {
       const allDetectedProjects: Project[] = [];
       for (const root of workspaceRoots) {
-        const detected = await scanWorkspace(root);
-        allDetectedProjects.push(...detected);
+        try {
+          const detected = await scanWorkspace(root);
+          allDetectedProjects.push(...detected);
+        } catch (scanError) {
+          console.error(`Failed to scan root ${root}:`, scanError);
+        }
       }
 
-      projects = allDetectedProjects.filter(
+      const uniqueProjects = allDetectedProjects.filter(
         (project, index, self) =>
           index === self.findIndex((p) => p.id === project.id)
       );
-      console.log('Scan complete. Detected projects:', projects.map(p => ({ name: p.name, hasScripts: !!Object.keys(p.scripts).length })));
+
+      console.log('Scan complete. Unique projects found:', uniqueProjects.length);
+      console.table(uniqueProjects.map(p => ({ name: p.name, path: p.path, scripts: Object.keys(p.scripts).length })));
+
+      projects = uniqueProjects;
 
       if (projects.length > 0 && !selectedProjectId) {
         selectedProjectId = projects[0].id;
@@ -73,11 +82,10 @@
 
   // Scan effect - only runs when workspaceRoots change length (add/remove)
   $effect(() => {
-    const rootCount = workspaceRoots.length;
-    if (rootCount > 0) {
-      console.log(`Workspace count changed to ${rootCount}. Re-scanning.`);
-      handleRefresh();
-    }
+    // We stringify the roots to establish a deep dependency on the array contents
+    const rootsString = JSON.stringify(workspaceRoots);
+    console.log(`Workspace roots updated: ${rootsString}. Re-scanning.`);
+    handleRefresh();
   });
 
   async function handleSelectWorkspace() {

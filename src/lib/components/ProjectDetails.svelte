@@ -121,8 +121,10 @@
   let customCommand = $state('');
   let recentCommands: string[] = $state([]);
 
+  // Reactively update recentCommands when the project.id changes
   $effect(() => {
-    recentCommands = JSON.parse(localStorage.getItem(`recent_${project.id}`) || '[]');
+    const id = project.id;
+    recentCommands = JSON.parse(localStorage.getItem(`recent_${id}`) || '[]');
   });
 
   function handleCustomCommand() {
