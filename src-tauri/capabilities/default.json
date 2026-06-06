@@ -9,23 +9,23 @@
     "dialog:allow-open",
     {
       "identifier": "fs:allow-read-dir",
-      "scope": ["**"]
+      "allow": [{ "path": "**" }]
     },
     {
       "identifier": "fs:allow-read-file",
-      "scope": ["**"]
+      "allow": [{ "path": "**" }]
     },
     {
       "identifier": "fs:allow-read-text-file",
-      "scope": ["**"]
+      "allow": [{ "path": "**" }]
     },
     {
       "identifier": "fs:allow-exists",
-      "scope": ["**"]
+      "allow": [{ "path": "**" }]
     },
     {
       "identifier": "fs:allow-stat",
-      "scope": ["**"]
+      "allow": [{ "path": "**" }]
     },
     "shell:default",
     {

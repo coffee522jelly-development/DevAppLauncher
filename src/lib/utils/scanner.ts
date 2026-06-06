@@ -12,6 +12,7 @@ async function detectPackageManager(projectPath: string): Promise<PackageManager
 }
 
 async function createProjectFromPath(path: string): Promise<Project> {
+  console.log(`[Scanner] Processing path: ${path}`);
   const folderName = path.split(/[/\\]/).filter(Boolean).pop() || 'unnamed';
   let scripts: Record<string, string> = {};
   let packageManager: PackageManager = 'npm';
@@ -20,7 +21,9 @@ async function createProjectFromPath(path: string): Promise<Project> {
 
   try {
     const packageJsonPath = await join(path, 'package.json');
+    console.log(`[Scanner] Checking package.json at: ${packageJsonPath}`);
     const hasPackageJson = await exists(packageJsonPath);
+    console.log(`[Scanner] package.json exists: ${hasPackageJson}`);
 
     if (hasPackageJson) {
       try {
@@ -28,9 +31,10 @@ async function createProjectFromPath(path: string): Promise<Project> {
         const pkg = JSON.parse(content);
         scripts = pkg.scripts || {};
         packageManager = await detectPackageManager(path);
+        console.log(`[Scanner] Found scripts: ${Object.keys(scripts).join(', ')}`);
       } catch (parseError: any) {
         error = `Failed to parse package.json: ${parseError.message}`;
-        console.error(`- Error at ${packageJsonPath}:`, parseError);
+        console.error(`[Scanner] !!! Parse error at ${packageJsonPath}:`, parseError);
       }
     }
 
@@ -38,7 +42,11 @@ async function createProjectFromPath(path: string): Promise<Project> {
     isTauri = await exists(tauriDirPath);
   } catch (e: any) {
     error = e.message || String(e);
-    console.error(`Error processing project at ${path}:`, e);
+    console.error(`[Scanner] !!! CRITICAL Error processing project at ${path}:`, {
+      message: e.message,
+      stack: e.stack,
+      raw: e
+    });
   }
 
   return {
