@@ -18,7 +18,7 @@
   import { Badge } from './ui/badge';
   import { Alert, AlertDescription, AlertTitle } from './ui/alert';
   import { cn } from '$lib/utils';
-  import { appendLog } from '../stores/commands';
+  import { appendLog, logs } from '../stores/commands';
 
   type Status = 'unknown' | 'installed' | 'missing' | 'checking';
 
