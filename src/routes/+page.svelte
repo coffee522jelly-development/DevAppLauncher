@@ -20,15 +20,31 @@
   let isScanning = $state(false);
 
   async function handleRefresh() {
-    console.log('Starting workspace scan...', { roots: workspaceRoots });
     if (workspaceRoots.length === 0) {
-      console.log('No workspace roots configured. Clearing projects.');
       projects = [];
       return;
     }
+
     isScanning = true;
+
     try {
+      // 1. Initialize projects with loading state for each root
+      const initialProjects: Project[] = workspaceRoots.map(root => ({
+        id: root,
+        name: root.split(/[/\\]/).filter(Boolean).pop() || 'unnamed',
+        path: root,
+        packageManager: 'npm',
+        scripts: {},
+        isTauri: false,
+        isLoading: true
+      }));
+
+      // Preserve existing projects if they are not in the new roots
+      projects = initialProjects;
+
       const allDetectedProjects: Project[] = [];
+
+      // 2. Perform actual scan for each root
       for (const root of workspaceRoots) {
         try {
           const detected = await scanWorkspace(root);
@@ -38,21 +54,19 @@
         }
       }
 
+      // 3. Update state with actual data
       const uniqueProjects = allDetectedProjects.filter(
         (project, index, self) =>
           index === self.findIndex((p) => p.id === project.id)
       );
 
-      console.log('Scan complete. Unique projects found:', uniqueProjects.length);
-      console.table(uniqueProjects.map(p => ({ name: p.name, path: p.path, scripts: Object.keys(p.scripts).length })));
-
       projects = uniqueProjects;
 
-      if (projects.length > 0 && !selectedProjectId) {
+      if (projects.length > 0 && (!selectedProjectId || !projects.find(p => p.id === selectedProjectId))) {
         selectedProjectId = projects[0].id;
       }
     } catch (error) {
-      console.error("Failed to scan workspaces", error);
+      console.error("Critical failure during refresh:", error);
     } finally {
       isScanning = false;
     }

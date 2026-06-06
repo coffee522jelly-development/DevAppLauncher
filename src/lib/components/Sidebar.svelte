@@ -37,12 +37,20 @@
           variant={selectedProjectId === project.id ? "secondary" : "ghost"}
           class={cn(
             "w-full justify-start gap-3 px-3 h-10 font-medium",
-            selectedProjectId === project.id && "bg-accent text-accent-foreground"
+            selectedProjectId === project.id && "bg-accent text-accent-foreground",
+            project.error && "text-destructive hover:text-destructive"
           )}
           onclick={() => onSelectProject(project.id)}
         >
-          <Folder class="h-4 w-4 text-muted-foreground" />
+          {#if project.isLoading}
+            <RefreshCw class="h-4 w-4 text-muted-foreground animate-spin" />
+          {:else}
+            <Folder class="h-4 w-4 text-muted-foreground" />
+          {/if}
           <span class="truncate">{project.name}</span>
+          {#if project.error}
+            <span class="ml-auto text-[10px] opacity-70">!</span>
+          {/if}
         </Button>
       {/each}
       {#if projects.length === 0 && !isScanning}

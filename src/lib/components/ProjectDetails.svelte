@@ -15,7 +15,8 @@
     Folder,
     Terminal,
     History,
-    RefreshCw
+    RefreshCw,
+    AlertCircle
   } from 'lucide-svelte';
   import type { Project } from '../types';
   import { runCommand, runCustomCommand, stopCommand, runningProcesses, runningCommands, logs, appendLog } from '../stores/commands';
@@ -166,6 +167,14 @@
       </div>
     </div>
   </header>
+
+  <!-- Error State -->
+  {#if project.error}
+    <div class="px-6 py-2 bg-destructive/10 text-destructive text-xs font-mono border-b flex items-center gap-2">
+      <AlertCircle class="h-3 w-3" />
+      <span>{project.error}</span>
+    </div>
+  {/if}
 
   <!-- Toolbar -->
   <div class="px-6 py-4 bg-muted border-b flex flex-wrap gap-4 items-center shrink-0">

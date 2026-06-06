@@ -7,6 +7,8 @@ export interface Project {
   packageManager: PackageManager;
   scripts: Record<string, string>;
   isTauri: boolean;
+  isLoading?: boolean;
+  error?: string;
 }
 
 export interface RunningProcess {

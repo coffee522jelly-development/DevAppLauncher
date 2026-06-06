@@ -12,19 +12,15 @@ async function detectPackageManager(projectPath: string): Promise<PackageManager
 }
 
 async function createProjectFromPath(path: string): Promise<Project> {
-  // Normalize path format for robustness
-  const normalizedPath = path.replace(/\\/g, '/');
-  console.log(`Scanning project path: ${normalizedPath}`);
-
-  const folderName = normalizedPath.split('/').filter(Boolean).pop() || 'unnamed';
+  const folderName = path.split(/[/\\]/).filter(Boolean).pop() || 'unnamed';
   let scripts: Record<string, string> = {};
   let packageManager: PackageManager = 'npm';
   let isTauri = false;
+  let error: string | undefined;
 
   try {
-    const packageJsonPath = await join(normalizedPath, 'package.json');
+    const packageJsonPath = await join(path, 'package.json');
     const hasPackageJson = await exists(packageJsonPath);
-    console.log(`- checking package.json at: ${packageJsonPath} (${hasPackageJson})`);
 
     if (hasPackageJson) {
       try {
@@ -32,50 +28,50 @@ async function createProjectFromPath(path: string): Promise<Project> {
         const pkg = JSON.parse(content);
         scripts = pkg.scripts || {};
         packageManager = await detectPackageManager(path);
-        console.log(`- package manager: ${packageManager}, scripts count: ${Object.keys(scripts).length}`);
-      } catch (parseError) {
-        console.error(`- Failed to parse package.json at ${packageJsonPath}:`, parseError);
+      } catch (parseError: any) {
+        error = `Failed to parse package.json: ${parseError.message}`;
+        console.error(`- Error at ${packageJsonPath}:`, parseError);
       }
     }
 
     const tauriDirPath = await join(path, 'src-tauri');
     isTauri = await exists(tauriDirPath);
-    console.log(`- is tauri project: ${isTauri}`);
-  } catch (e) {
+  } catch (e: any) {
+    error = e.message || String(e);
     console.error(`Error processing project at ${path}:`, e);
   }
 
   return {
-    id: normalizedPath,
-    name: folderName, // Prioritize folder name
-    path: normalizedPath,
+    id: path,
+    name: folderName,
+    path: path,
     packageManager,
     scripts,
     isTauri,
+    error,
+    isLoading: false
   };
 }
 
 export async function scanWorkspace(rootPath: string): Promise<Project[]> {
-  const normalizedRoot = rootPath.replace(/\\/g, '/');
-  console.log(`Starting workspace scan at: ${normalizedRoot}`);
   const projects: Project[] = [];
 
   try {
-    // 1. Check if the root path itself is a project
-    const rootProject = await createProjectFromPath(normalizedRoot);
-    if (Object.keys(rootProject.scripts).length > 0) {
-      projects.push(rootProject);
-    }
+    // 1. Root path itself is always a project (even if it has error)
+    projects.push(await createProjectFromPath(rootPath));
 
     // 2. Scan immediate subdirectories
-    const entries = await readDir(normalizedRoot);
+    const entries = await readDir(rootPath);
     for (const entry of entries) {
       if (entry.isDirectory && !IGNORED_DIRS.includes(entry.name)) {
-        const subPath = await join(normalizedRoot, entry.name);
-        const subProject = await createProjectFromPath(subPath);
-        // Only add if it actually has scripts (valid Node.js project)
-        if (Object.keys(subProject.scripts).length > 0) {
-          projects.push(subProject);
+        const subPath = await join(rootPath, entry.name);
+        const project = await createProjectFromPath(subPath);
+
+        // Add if it has a package.json OR it's a directory we might want to link
+        // For subdirectories, we only add if they look like projects (have scripts)
+        // to avoid too much noise.
+        if (Object.keys(project.scripts).length > 0) {
+          projects.push(project);
         }
       }
     }
@@ -83,6 +79,5 @@ export async function scanWorkspace(rootPath: string): Promise<Project[]> {
     console.error(`Failed to scan workspace ${rootPath}`, e);
   }
 
-  console.log(`Scan finished for ${rootPath}. Found ${projects.length} valid project(s).`);
   return projects;
 }
