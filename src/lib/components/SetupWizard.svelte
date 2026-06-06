@@ -58,9 +58,9 @@
     {
       id: 'msvc',
       name: 'MSVC C++ Build Tools',
-      description: 'Required components for compiling Rust/Tauri on Windows.',
+      description: 'Required components for compiling Rust/Tauri on Windows. Note: May show missing if not in system PATH.',
       checkCmd: 'cl',
-      checkArgs: ['/?'], // Basic help command to check if in PATH
+      checkArgs: ['-help'],
       installCmd: 'winget',
       installArgs: ['install', 'Microsoft.VisualStudio.2022.BuildTools', '--override', '"--add Microsoft.VisualStudio.Component.VC.Tools.x86.x64 --passive --norestart"'],
       status: 'unknown'
@@ -82,20 +82,31 @@
   async function checkStatus(tool: Tool) {
     tool.status = 'checking';
     try {
-      // Use Command.create for check
-      const cmd = Command.create(
-        isWindows && ['node', 'npm', 'git'].includes(tool.checkCmd) ? `${tool.checkCmd}.cmd` : tool.checkCmd,
-        tool.checkArgs
-      );
+      let program = tool.checkCmd;
+      if (isWindows) {
+        // Node, Rust, and Git (usually) are .exe or internal,
+        // while npm/pnpm/yarn are .cmd
+        if (['npm', 'pnpm', 'yarn'].includes(program)) {
+          program = `${program}.cmd`;
+        }
+      }
+
+      console.log(`Checking ${tool.name} using ${program} ${tool.checkArgs.join(' ')}`);
+      const cmd = Command.create(program, tool.checkArgs);
       const output = await cmd.execute();
+
+      console.log(`- ${tool.name} check output code: ${output.code}`);
 
       if (output.code === 0) {
         tool.status = 'installed';
-        tool.version = output.stdout.trim().split('\n')[0];
+        const versionMatch = (output.stdout || output.stderr).trim().split('\n')[0];
+        tool.version = versionMatch;
       } else {
+        console.warn(`- ${tool.name} check failed:`, output.stderr || output.stdout);
         tool.status = 'missing';
       }
     } catch (e) {
+      console.error(`- ${tool.name} check error:`, e);
       tool.status = 'missing';
     }
   }
@@ -110,10 +121,12 @@
     });
 
     try {
-      const cmd = Command.create(
-        isWindows && ['winget', 'npm'].includes(tool.installCmd) ? `${tool.installCmd}.cmd` : tool.installCmd,
-        tool.installArgs || []
-      );
+      let program = tool.installCmd;
+      if (isWindows && program === 'npm') {
+        program = 'npm.cmd';
+      }
+
+      const cmd = Command.create(program, tool.installArgs || []);
 
       cmd.stdout.on('data', (line) => {
         appendLog('setup', { type: 'stdout', content: line, timestamp: new Date().toLocaleTimeString() });
@@ -211,11 +224,7 @@
     {/each}
   </div>
 
-  <div class="bg-zinc-950 rounded-lg border border-zinc-800 p-4 font-mono text-xs overflow-hidden">
-    <div class="flex items-center gap-2 text-zinc-500 mb-2 border-b border-zinc-900 pb-2 uppercase tracking-widest text-[10px] font-bold">
-      <Terminal class="h-3 w-3" />
-      Setup Output
-    </div>
-    <p class="text-zinc-600 italic">Installation logs will appear here...</p>
+  <div class="flex-1 min-h-[300px]">
+    <LogViewer projectLogs={$logs['setup'] || []} />
   </div>
 </div>
