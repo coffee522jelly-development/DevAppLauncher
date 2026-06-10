@@ -119,6 +119,10 @@
     runCommand(project.id, project.path, 'npx', ['serve', 'build', '-p', '5000']);
   }
 
+  function handleCheckVersion(tool: string) {
+    runCommand(project.id, project.path, tool, ['-v']);
+  }
+
   let customCommand = $state('');
   let recentCommands: string[] = $state([]);
 
@@ -140,29 +144,31 @@
 
 <div class="flex flex-col h-full bg-background text-foreground overflow-hidden">
   <!-- Header -->
-  <header class="p-6 border-b bg-card">
+  <header class="px-4 py-3 border-b bg-card shrink-0">
     <div class="flex items-center justify-between">
-      <div class="space-y-1">
-        <div class="flex items-center gap-3">
-          <h1 class="text-2xl font-bold tracking-tight">{project.name}</h1>
-          <Badge variant="outline" class="font-mono uppercase px-2 py-0">{project.packageManager}</Badge>
-          {#if project.isTauri}
-            <Badge variant="secondary" class="font-bold">TAURI</Badge>
-          {/if}
-        </div>
-        <p class="text-xs text-muted-foreground font-mono bg-muted px-2 py-1 rounded inline-block">
+      <div class="flex items-center gap-3 min-w-0">
+        <h1 class="text-lg font-bold tracking-tight truncate">{project.name}</h1>
+        <Badge variant="outline" class="font-mono uppercase px-1.5 py-0 text-[10px] h-4">{project.packageManager}</Badge>
+        {#if project.isTauri}
+          <Badge variant="secondary" class="font-bold text-[10px] h-4">TAURI</Badge>
+        {/if}
+        <span class="text-[10px] text-muted-foreground font-mono bg-muted px-1.5 py-0.5 rounded truncate opacity-60">
           {project.path}
-        </p>
+        </span>
       </div>
-      <div class="flex items-center gap-2">
-        <Button variant="ghost" size="icon" onclick={onRefresh} title={$_('refreshProjects')}>
-          <RefreshCw class="h-5 w-5" />
+      <div class="flex items-center gap-1 shrink-0">
+        <div class="join mr-2">
+          <Button variant="outline" size="sm" class="h-6 px-1.5 text-[10px] join-item" onclick={() => handleCheckVersion('node')}>node -v</Button>
+          <Button variant="outline" size="sm" class="h-6 px-1.5 text-[10px] join-item" onclick={() => handleCheckVersion('npm')}>npm -v</Button>
+        </div>
+        <Button variant="ghost" size="icon" class="h-7 w-7" onclick={onRefresh} title={$_('refreshProjects')}>
+          <RefreshCw class="h-3.5 w-3.5" />
         </Button>
-        <Button variant="ghost" size="icon" onclick={handleOpenVSCode} title={$_('openVSCode')}>
-          <Keyboard class="h-5 w-5" />
+        <Button variant="ghost" size="icon" class="h-7 w-7" onclick={handleOpenVSCode} title={$_('openVSCode')}>
+          <Keyboard class="h-4 w-4" />
         </Button>
-        <Button variant="ghost" size="icon" onclick={handleOpenFolder} title={$_('openFolder')}>
-          <Folder class="h-5 w-5" />
+        <Button variant="ghost" size="icon" class="h-7 w-7" onclick={handleOpenFolder} title={$_('openFolder')}>
+          <Folder class="h-4 w-4" />
         </Button>
       </div>
     </div>
@@ -170,70 +176,70 @@
 
   <!-- Error State -->
   {#if project.error}
-    <div class="px-6 py-2 bg-destructive/10 text-destructive text-xs font-mono border-b flex items-center gap-2">
-      <AlertCircle class="h-3 w-3" />
+    <div class="px-4 py-1.5 bg-destructive/10 text-destructive text-[10px] font-mono border-b flex items-center gap-2">
+      <AlertCircle class="h-2.5 w-2.5" />
       <span>{project.error}</span>
     </div>
   {/if}
 
   <!-- Toolbar -->
-  <div class="px-6 py-4 bg-muted border-b flex flex-wrap gap-4 items-center shrink-0">
-    <div class="flex items-center gap-2">
-      <Button size="sm" class="gap-2" disabled={isRunning} onclick={handleInstall}>
-        <Download class="h-4 w-4" />
+  <div class="px-4 py-1.5 bg-muted border-b flex flex-wrap gap-2 items-center shrink-0">
+    <div class="flex items-center gap-1.5">
+      <Button size="sm" class="h-7 px-2 gap-1.5 text-xs" disabled={isRunning} onclick={handleInstall}>
+        <Download class="h-3 w-3" />
         {$_('install')}
       </Button>
     </div>
 
-    <Separator orientation="vertical" class="h-8" />
+    <Separator orientation="vertical" class="h-6" />
 
-    <div class="flex items-center gap-2">
+    <div class="flex items-center gap-1.5">
       {#if project.isTauri}
-        <Button variant="outline" size="sm" class="border-blue-500/50 hover:bg-blue-500/10 gap-2" disabled={isRunning} onclick={() => handleRunScript('tauri dev')}>
-          <Play class="h-4 w-4 text-blue-500" />
+        <Button variant="outline" size="sm" class="h-7 px-2 border-blue-500/30 hover:bg-blue-500/10 gap-1.5 text-xs" disabled={isRunning} onclick={() => handleRunScript('tauri dev')}>
+          <Play class="h-3 w-3 text-blue-500" />
           tauri dev
         </Button>
-        <Button variant="outline" size="sm" class="border-blue-500/50 hover:bg-blue-500/10 gap-2" disabled={isRunning} onclick={() => handleRunScript('tauri build')}>
-          <Monitor class="h-4 w-4 text-blue-500" />
+        <Button variant="outline" size="sm" class="h-7 px-2 border-blue-500/30 hover:bg-blue-500/10 gap-1.5 text-xs" disabled={isRunning} onclick={() => handleRunScript('tauri build')}>
+          <Monitor class="h-3 w-3 text-blue-500" />
           tauri build
         </Button>
       {/if}
 
       <div class="flex flex-wrap gap-1">
         {#each Object.keys(project.scripts).filter(s => s !== 'tauri') as scriptName}
-          <Button variant="outline" size="sm" disabled={isRunning} onclick={() => handleRunScript(scriptName)}>
+          <Button variant="outline" size="sm" class="h-7 px-2 text-xs" disabled={isRunning} onclick={() => handleRunScript(scriptName)}>
             {scriptName}
           </Button>
         {/each}
       </div>
     </div>
 
-    <Separator orientation="vertical" class="h-8" />
+    <Separator orientation="vertical" class="h-6" />
 
-    <div class="flex items-center gap-2">
-      <Button variant="secondary" size="sm" class="gap-2" disabled={isRunning || !gitServerUrl} onclick={handleGitClone}>
-        <GitBranch class="h-4 w-4" />
+    <div class="flex items-center gap-1.5">
+      <Button variant="secondary" size="sm" class="h-7 px-2 gap-1.5 text-xs" disabled={isRunning || !gitServerUrl} onclick={handleGitClone}>
+        <GitBranch class="h-3 w-3 text-muted-foreground" />
         {$_('gitClone')}
       </Button>
-      <Button variant="secondary" size="sm" class="gap-2" disabled={isRunning} onclick={handleGitPush}>
-        <Send class="h-4 w-4" />
+      <Button variant="secondary" size="sm" class="h-7 px-2 gap-1.5 text-xs" disabled={isRunning} onclick={handleGitPush}>
+        <Send class="h-3 w-3 text-muted-foreground" />
         {$_('gitPush')}
       </Button>
     </div>
 
-    <Separator orientation="vertical" class="h-8" />
+    <Separator orientation="vertical" class="h-6" />
 
-    <div class="flex items-center gap-2">
-      <Button variant="ghost" size="sm" class="gap-2" disabled={isRunning} onclick={handleAuditFix}>
-        <ShieldCheck class="h-4 w-4" />
+    <div class="flex items-center gap-1">
+      <Button variant="ghost" size="sm" class="h-7 px-2 gap-1.5 text-xs" disabled={isRunning} onclick={handleAuditFix}>
+        <ShieldCheck class="h-3 w-3 opacity-60" />
         Audit
       </Button>
-      <Button variant="ghost" size="sm" class="gap-2" disabled={isRunning} onclick={handleCheckUpdates}>
-        <ArrowUpCircle class="h-4 w-4" />
+      <Button variant="ghost" size="sm" class="h-7 px-2 gap-1.5 text-xs" disabled={isRunning} onclick={handleCheckUpdates}>
+        <ArrowUpCircle class="h-3 w-3 opacity-60" />
         Updates
       </Button>
-      <Button variant="ghost" size="sm" class="gap-2" disabled={isRunning} onclick={handlePreview}>
-        <ExternalLink class="h-4 w-4" />
+      <Button variant="ghost" size="sm" class="h-7 px-2 gap-1.5 text-xs" disabled={isRunning} onclick={handlePreview}>
+        <ExternalLink class="h-3 w-3 opacity-60" />
         Preview
       </Button>
     </div>

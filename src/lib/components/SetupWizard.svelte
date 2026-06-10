@@ -19,6 +19,7 @@
   import { Alert, AlertDescription, AlertTitle } from './ui/alert';
   import { cn } from '$lib/utils';
   import { appendLog, logs } from '../stores/commands';
+  import LogViewer from './LogViewer.svelte';
 
   type Status = 'unknown' | 'installed' | 'missing' | 'checking';
 
