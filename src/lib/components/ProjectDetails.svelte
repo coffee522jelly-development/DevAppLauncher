@@ -1,7 +1,7 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
   import { revealItemInDir } from '@tauri-apps/plugin-opener';
-  import { readDir } from '@tauri-apps/plugin-fs';
+  import { readDir, remove } from '@tauri-apps/plugin-fs';
   import { type } from '@tauri-apps/plugin-os';
   import {
     Play,
@@ -19,7 +19,8 @@
     History,
     RefreshCw,
     AlertCircle,
-    FileArchive
+    FileArchive,
+    Trash2
   } from 'lucide-svelte';
   import type { Project } from '../types';
   import { runCommand, runCustomCommand, stopCommand, runningProcesses, runningCommands, logs, appendLog } from '../stores/commands';
@@ -164,6 +165,22 @@
     setTimeout(scanForZips, 2000);
   }
 
+  async function handleDeleteZip(zipName: string) {
+    if (!project.path) return;
+    try {
+      const fullPath = `${project.path}/${zipName}`;
+      await remove(fullPath);
+      appendLog(project.id, {
+        type: 'info',
+        content: `Deleted: ${zipName}`,
+        timestamp: new Date().toLocaleTimeString()
+      });
+      scanForZips();
+    } catch (e) {
+      console.error("Failed to delete zip file:", e);
+    }
+  }
+
   let customCommand = $state('');
   let recentCommands: string[] = $state([]);
 
@@ -290,10 +307,15 @@
       <Separator orientation="vertical" class="h-6" />
       <div class="flex items-center gap-1.5">
         {#each zipFiles as zip}
-          <Button variant="outline" size="sm" class="h-7 px-2 gap-1.5 text-xs border-amber-500/30 hover:bg-amber-500/10" disabled={isRunning} onclick={() => handleExtractZip(zip)}>
-            <FileArchive class="h-3 w-3 text-amber-500" />
-            {$_('extractZip')}: {zip}
-          </Button>
+          <div class="join">
+            <Button variant="outline" size="sm" class="h-7 px-2 gap-1.5 text-xs border-amber-500/30 hover:bg-amber-500/10 join-item" disabled={isRunning} onclick={() => handleExtractZip(zip)}>
+              <FileArchive class="h-3 w-3 text-amber-500" />
+              {$_('extractZip')}: {zip}
+            </Button>
+            <Button variant="outline" size="icon" class="h-7 w-7 border-amber-500/30 hover:bg-destructive hover:text-destructive-foreground join-item" disabled={isRunning} onclick={() => handleDeleteZip(zip)} title={$_('delete')}>
+              <Trash2 class="h-3 w-3" />
+            </Button>
+          </div>
         {/each}
       </div>
     {/if}

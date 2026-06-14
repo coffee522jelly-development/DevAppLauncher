@@ -27,6 +27,10 @@
       "identifier": "fs:allow-stat",
       "allow": [{ "path": "**" }]
     },
+    {
+      "identifier": "fs:allow-remove",
+      "allow": [{ "path": "**" }]
+    },
     "shell:default",
     {
       "identifier": "shell:allow-spawn",

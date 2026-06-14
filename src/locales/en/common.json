@@ -23,5 +23,6 @@
   "openVSCode": "Open in VS Code",
   "customCommand": "Run Custom Command",
   "run": "Run",
-  "extractZip": "Extract"
+  "extractZip": "Extract",
+  "delete": "Delete"
 }

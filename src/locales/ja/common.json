@@ -23,5 +23,6 @@
   "openVSCode": "VS Codeで開く",
   "customCommand": "カスタムコマンド実行",
   "run": "実行",
-  "extractZip": "解凍"
+  "extractZip": "解凍",
+  "delete": "削除"
 }
