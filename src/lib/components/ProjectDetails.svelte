@@ -1,6 +1,8 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
   import { revealItemInDir } from '@tauri-apps/plugin-opener';
+  import { readDir } from '@tauri-apps/plugin-fs';
+  import { type } from '@tauri-apps/plugin-os';
   import {
     Play,
     Square,
@@ -16,7 +18,8 @@
     Terminal,
     History,
     RefreshCw,
-    AlertCircle
+    AlertCircle,
+    FileArchive
   } from 'lucide-svelte';
   import type { Project } from '../types';
   import { runCommand, runCustomCommand, stopCommand, runningProcesses, runningCommands, logs, appendLog } from '../stores/commands';
@@ -123,13 +126,52 @@
     runCommand(project.id, project.path, tool, ['-v']);
   }
 
+  let zipFiles: string[] = $state([]);
+  let isScanningZips = $state(false);
+
+  async function scanForZips() {
+    if (!project.path) return;
+    isScanningZips = true;
+    try {
+      const entries = await readDir(project.path);
+      zipFiles = entries
+        .filter(e => e.isFile && e.name.toLowerCase().endsWith('.zip'))
+        .map(e => e.name);
+    } catch (e) {
+      console.error("Failed to scan for zip files:", e);
+      zipFiles = [];
+    } finally {
+      isScanningZips = false;
+    }
+  }
+
+  async function handleExtractZip(zipName: string) {
+    const isWin = type() === 'windows';
+    if (isWin) {
+      // Powershell command to extract zip
+      // Expand-Archive -Path "source" -DestinationPath "dest" -Force
+      const args = [
+        '-Command',
+        `Expand-Archive -Path "${zipName}" -DestinationPath "." -Force`
+      ];
+      await runCommand(project.id, project.path, 'powershell', args);
+    } else {
+      // tar command to extract zip
+      // tar -xf file.zip
+      await runCommand(project.id, project.path, 'tar', ['-xf', zipName]);
+    }
+    // Refresh zip list after extraction (maybe it was deleted or new files added)
+    setTimeout(scanForZips, 2000);
+  }
+
   let customCommand = $state('');
   let recentCommands: string[] = $state([]);
 
-  // Reactively update recentCommands when the project.id changes
+  // Reactively update recentCommands and scan for zips when the project.id changes
   $effect(() => {
     const id = project.id;
     recentCommands = JSON.parse(localStorage.getItem(`recent_${id}`) || '[]');
+    scanForZips();
   });
 
   function handleCustomCommand() {
@@ -243,6 +285,18 @@
         Preview
       </Button>
     </div>
+
+    {#if zipFiles.length > 0}
+      <Separator orientation="vertical" class="h-6" />
+      <div class="flex items-center gap-1.5">
+        {#each zipFiles as zip}
+          <Button variant="outline" size="sm" class="h-7 px-2 gap-1.5 text-xs border-amber-500/30 hover:bg-amber-500/10" disabled={isRunning} onclick={() => handleExtractZip(zip)}>
+            <FileArchive class="h-3 w-3 text-amber-500" />
+            {$_('extractZip')}: {zip}
+          </Button>
+        {/each}
+      </div>
+    {/if}
   </div>
 
   <!-- Content Area (Logs) -->

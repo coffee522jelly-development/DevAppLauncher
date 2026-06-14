@@ -22,5 +22,6 @@
   "openFolder": "Open in File Explorer",
   "openVSCode": "Open in VS Code",
   "customCommand": "Run Custom Command",
-  "run": "Run"
+  "run": "Run",
+  "extractZip": "Extract"
 }
