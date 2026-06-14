@@ -46,11 +46,7 @@
         { "name": "npx.cmd", "cmd": "npx.cmd", "args": true },
         { "name": "cmd", "cmd": "cmd", "args": true },
         { "name": "sh", "cmd": "sh", "args": true },
-        { "name": "winget", "cmd": "winget", "args": true },
-        { "name": "powershell", "cmd": "powershell", "args": true },
-        { "name": "node", "cmd": "node", "args": true },
-        { "name": "rustc", "cmd": "rustc", "args": true },
-        { "name": "cl", "cmd": "cl", "args": true }
+        { "name": "node", "cmd": "node", "args": true }
       ]
     }
   ]

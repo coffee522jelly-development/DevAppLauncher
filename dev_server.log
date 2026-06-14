@@ -2,9 +2,18 @@
 > dev-app-launcher@0.1.0 dev
 > vite dev
 
+Port 5173 is in use, trying another one...
 
-  VITE v6.0.3  ready in 1459 ms
+  VITE v6.0.3  ready in 1450 ms
 
-  ➜  Local:   http://localhost:5173/
+  ➜  Local:   http://localhost:5174/
   ➜  Network: use --host to expose
 /*! 🌼 daisyUI 5.5.20 */
+lte-kit/generated/client/nodes/0.js
+8:02:00 AM [vite] (client) page reload .svelte-kit/generated/client/nodes/1.js
+8:02:00 AM [vite] (client) page reload .svelte-kit/generated/client/nodes/2.js
+8:02:00 AM [vite] (client) page reload .svelte-kit/generated/client/app.js
+8:02:00 AM [vite] (client) page reload .svelte-kit/generated/client/matchers.js
+8:02:00 AM [vite] (ssr) page reload .svelte-kit/generated/server/internal.js
+8:02:00 AM [vite] (client) page reload .svelte-kit/generated/root.js
+8:02:00 AM [vite] (ssr) page reload .svelte-kit/generated/root.js

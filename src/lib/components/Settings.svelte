@@ -19,8 +19,6 @@
   import { Label } from './ui/label';
   import { Separator } from './ui/separator';
   import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
-  import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
-  import SetupWizard from './SetupWizard.svelte';
   import { cn } from '$lib/utils';
 
   let {
@@ -85,16 +83,8 @@
       <p class="text-sm text-muted-foreground italic">Customize your DevAppLauncher experience.</p>
     </DialogHeader>
 
-    <Tabs value="general" class="flex-1 flex flex-col overflow-hidden">
-      <div class="px-6 border-b shrink-0 bg-muted/20">
-        <TabsList class="w-full justify-start h-12 bg-transparent gap-6">
-          <TabsTrigger value="general" class="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none h-full px-0">General</TabsTrigger>
-          <TabsTrigger value="setup" class="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none h-full px-0">Setup Wizard</TabsTrigger>
-        </TabsList>
-      </div>
-
-      <div class="flex-1 overflow-y-auto">
-        <TabsContent value="general" class="p-6 m-0 space-y-8">
+    <div class="flex-1 overflow-y-auto">
+        <div class="p-6 m-0 space-y-8">
           <!-- Workspaces Section -->
           <section class="space-y-4">
             <div class="flex items-center gap-2 text-primary font-bold">
@@ -189,13 +179,8 @@
               </select>
             </div>
           </section>
-        </TabsContent>
-
-        <TabsContent value="setup" class="p-6 m-0">
-          <SetupWizard />
-        </TabsContent>
+        </div>
       </div>
-    </Tabs>
 
     <div class="p-6 border-t bg-muted/20 flex justify-end shrink-0">
       <Button variant="default" class="px-8" onclick={onClose}>
