@@ -15,8 +15,8 @@ pub fn run() {
             }
             // 既に起動していることをユーザーに知らせる
             app.dialog()
-                .message("DevAppLauncher is already running.")
-                .title("Already Running")
+                .message("DevAppLauncherは既に起動しています。")
+                .title("二重起動の防止")
                 .show(|_| {});
         }))
         // OS 情報を取得するためのプラグイン（Windows/macOS 判定に使用）
