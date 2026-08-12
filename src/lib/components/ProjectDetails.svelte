@@ -195,10 +195,19 @@
       await runCommand(project.id, project.path, 'tar', ['-xf', zipName]);
     }
 
-    // 3. Find the newly created folder and flatten it
+    // 3. Wait slightly for file system sync
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    // 4. Find the newly created folder and flatten it
     try {
       const entriesAfter = await readDir(project.path);
       const newDirs = entriesAfter.filter(e => e.isDirectory && e.name && !existingDirs.has(e.name));
+
+      appendLog(project.id, {
+        type: 'info',
+        content: `Found ${newDirs.length} new directories after extraction.`,
+        timestamp: new Date().toLocaleTimeString()
+      });
 
       // Usually, extracting a well-formed zip creates exactly 1 root folder
       if (newDirs.length === 1 && newDirs[0].name) {
@@ -211,19 +220,33 @@
           if (!sub.name) continue;
           const oldPath = await join(extractFolderPath, sub.name);
           const newPath = await join(project.path, sub.name);
-          await rename(oldPath, newPath);
+
+          try {
+            await rename(oldPath, newPath);
+          } catch (renameErr: any) {
+             appendLog(project.id, {
+              type: 'stderr',
+              content: `Failed to move ${sub.name}: ${renameErr.message || renameErr}`,
+              timestamp: new Date().toLocaleTimeString()
+            });
+          }
         }
 
         // Delete the now empty folder
         await remove(extractFolderPath, { recursive: true });
         appendLog(project.id, {
           type: 'info',
-          content: `Flattened extracted folder: ${extractFolderName}`,
+          content: `Successfully flattened extracted folder: ${extractFolderName}`,
           timestamp: new Date().toLocaleTimeString()
         });
       }
-    } catch (e) {
+    } catch (e: any) {
       console.error("Failed to flatten extracted zip", e);
+      appendLog(project.id, {
+        type: 'stderr',
+        content: `Error during flattening: ${e.message || e}`,
+        timestamp: new Date().toLocaleTimeString()
+      });
     }
 
     scanForZips();
