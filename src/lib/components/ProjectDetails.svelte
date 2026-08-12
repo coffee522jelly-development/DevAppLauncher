@@ -1,7 +1,7 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
   import { revealItemInDir } from '@tauri-apps/plugin-opener';
-  import { readDir, remove } from '@tauri-apps/plugin-fs';
+  import { readDir, remove, rename } from '@tauri-apps/plugin-fs';
   import { type } from '@tauri-apps/plugin-os';
   import {
     Play,
@@ -168,22 +168,65 @@
   }
 
   async function handleExtractZip(zipName: string) {
+    if (!project.path) return;
     const isWin = type() === 'windows';
+
+    // 1. Get snapshot of current directories to detect the newly created one
+    let existingDirs = new Set<string>();
+    try {
+      const entriesBefore = await readDir(project.path);
+      for (const e of entriesBefore) {
+        if (e.isDirectory && e.name) {
+          existingDirs.add(e.name);
+        }
+      }
+    } catch (e) {
+      console.error("Failed to read dir before extraction", e);
+    }
+
+    // 2. Extract
     if (isWin) {
-      // Powershell command to extract zip
-      // Expand-Archive -Path "source" -DestinationPath "dest" -Force
       const args = [
         '-Command',
         `Expand-Archive -Path "${zipName}" -DestinationPath "." -Force`
       ];
       await runCommand(project.id, project.path, 'powershell', args);
     } else {
-      // tar command to extract zip
-      // tar -xf file.zip
       await runCommand(project.id, project.path, 'tar', ['-xf', zipName]);
     }
-    // Refresh zip list after extraction (maybe it was deleted or new files added)
-    setTimeout(scanForZips, 2000);
+
+    // 3. Find the newly created folder and flatten it
+    try {
+      const entriesAfter = await readDir(project.path);
+      const newDirs = entriesAfter.filter(e => e.isDirectory && e.name && !existingDirs.has(e.name));
+
+      // Usually, extracting a well-formed zip creates exactly 1 root folder
+      if (newDirs.length === 1 && newDirs[0].name) {
+        const extractFolderName = newDirs[0].name;
+        const extractFolderPath = await join(project.path, extractFolderName);
+        const subEntries = await readDir(extractFolderPath);
+
+        // Move all items to project.path
+        for (const sub of subEntries) {
+          if (!sub.name) continue;
+          const oldPath = await join(extractFolderPath, sub.name);
+          const newPath = await join(project.path, sub.name);
+          await rename(oldPath, newPath);
+        }
+
+        // Delete the now empty folder
+        await remove(extractFolderPath, { recursive: true });
+        appendLog(project.id, {
+          type: 'info',
+          content: `Flattened extracted folder: ${extractFolderName}`,
+          timestamp: new Date().toLocaleTimeString()
+        });
+      }
+    } catch (e) {
+      console.error("Failed to flatten extracted zip", e);
+    }
+
+    scanForZips();
   }
 
   async function handleDeleteZip(zipName: string) {
