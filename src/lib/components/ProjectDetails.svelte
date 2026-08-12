@@ -1,7 +1,7 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
   import { revealItemInDir } from '@tauri-apps/plugin-opener';
-  import { readDir, remove } from '@tauri-apps/plugin-fs';
+  import { readDir, remove, rename } from '@tauri-apps/plugin-fs';
   import { type } from '@tauri-apps/plugin-os';
   import {
     Play,
@@ -22,6 +22,7 @@
     FileArchive,
     Trash2
   } from 'lucide-svelte';
+  import { join } from '@tauri-apps/api/path';
   import type { Project } from '../types';
   import { runCommand, runCustomCommand, stopCommand, runningProcesses, runningCommands, logs, appendLog } from '../stores/commands';
   import LogViewer from './LogViewer.svelte';
@@ -48,6 +49,26 @@
     const cmd = project.packageManager;
     const args = cmd === 'yarn' ? [] : ['install'];
     runCommand(project.id, project.path, cmd, args);
+  }
+
+  async function handleResetProject() {
+    if (!project.path) return;
+    try {
+      const entries = await readDir(project.path);
+      for (const entry of entries) {
+        if (!entry.name) continue;
+        if (entry.name === 'node_modules' || entry.name.endsWith('.zip')) {
+          continue;
+        }
+        const fullPath = await join(project.path, entry.name);
+        await remove(fullPath, { recursive: true });
+      }
+      alert(`Reset project ${project.name} complete.`);
+      onRefresh(); // Trigger a refresh of the workspace to reflect the changes
+    } catch (error) {
+      console.error(`Failed to reset project ${project.name}`, error);
+      alert(`Failed to reset project ${project.name}: ${error}`);
+    }
   }
 
   function handleRunScript(scriptName: string) {
@@ -147,22 +168,88 @@
   }
 
   async function handleExtractZip(zipName: string) {
+    if (!project.path) return;
     const isWin = type() === 'windows';
+
+    // 1. Get snapshot of current directories to detect the newly created one
+    let existingDirs = new Set<string>();
+    try {
+      const entriesBefore = await readDir(project.path);
+      for (const e of entriesBefore) {
+        if (e.isDirectory && e.name) {
+          existingDirs.add(e.name);
+        }
+      }
+    } catch (e) {
+      console.error("Failed to read dir before extraction", e);
+    }
+
+    // 2. Extract
     if (isWin) {
-      // Powershell command to extract zip
-      // Expand-Archive -Path "source" -DestinationPath "dest" -Force
       const args = [
         '-Command',
         `Expand-Archive -Path "${zipName}" -DestinationPath "." -Force`
       ];
       await runCommand(project.id, project.path, 'powershell', args);
     } else {
-      // tar command to extract zip
-      // tar -xf file.zip
       await runCommand(project.id, project.path, 'tar', ['-xf', zipName]);
     }
-    // Refresh zip list after extraction (maybe it was deleted or new files added)
-    setTimeout(scanForZips, 2000);
+
+    // 3. Wait slightly for file system sync
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    // 4. Find the newly created folder and flatten it
+    try {
+      const entriesAfter = await readDir(project.path);
+      const newDirs = entriesAfter.filter(e => e.isDirectory && e.name && !existingDirs.has(e.name));
+
+      appendLog(project.id, {
+        type: 'info',
+        content: `Found ${newDirs.length} new directories after extraction.`,
+        timestamp: new Date().toLocaleTimeString()
+      });
+
+      // Usually, extracting a well-formed zip creates exactly 1 root folder
+      if (newDirs.length === 1 && newDirs[0].name) {
+        const extractFolderName = newDirs[0].name;
+        const extractFolderPath = await join(project.path, extractFolderName);
+        const subEntries = await readDir(extractFolderPath);
+
+        // Move all items to project.path
+        for (const sub of subEntries) {
+          if (!sub.name) continue;
+          const oldPath = await join(extractFolderPath, sub.name);
+          const newPath = await join(project.path, sub.name);
+
+          try {
+            await rename(oldPath, newPath);
+          } catch (renameErr: any) {
+             appendLog(project.id, {
+              type: 'stderr',
+              content: `Failed to move ${sub.name}: ${renameErr.message || renameErr}`,
+              timestamp: new Date().toLocaleTimeString()
+            });
+          }
+        }
+
+        // Delete the now empty folder
+        await remove(extractFolderPath, { recursive: true });
+        appendLog(project.id, {
+          type: 'info',
+          content: `Successfully flattened extracted folder: ${extractFolderName}`,
+          timestamp: new Date().toLocaleTimeString()
+        });
+      }
+    } catch (e: any) {
+      console.error("Failed to flatten extracted zip", e);
+      appendLog(project.id, {
+        type: 'stderr',
+        content: `Error during flattening: ${e.message || e}`,
+        timestamp: new Date().toLocaleTimeString()
+      });
+    }
+
+    scanForZips();
   }
 
   async function handleDeleteZip(zipName: string) {
@@ -247,6 +334,10 @@
       <Button size="sm" class="h-7 px-2 gap-1.5 text-xs" disabled={isRunning} onclick={handleInstall}>
         <Download class="h-3 w-3" />
         {$_('install')}
+      </Button>
+      <Button variant="outline" size="sm" class="h-7 px-2 gap-1.5 text-xs text-warning border-warning/30 hover:bg-warning/10" disabled={isRunning} onclick={handleResetProject} title="Reset (Delete all except .zip and node_modules)">
+        <RefreshCw class="h-3 w-3" />
+        Reset
       </Button>
     </div>
 
