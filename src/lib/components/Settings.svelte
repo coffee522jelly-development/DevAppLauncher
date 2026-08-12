@@ -12,11 +12,8 @@
     Key,
     LayoutGrid,
     Check,
-    GitBranch,
-    RefreshCw
+    GitBranch
   } from 'lucide-svelte';
-  import { readDir, remove } from '@tauri-apps/plugin-fs';
-  import { join } from '@tauri-apps/api/path';
   import { Button } from './ui/button';
   import { Input } from './ui/input';
   import { Label } from './ui/label';
@@ -66,23 +63,6 @@
     onWorkspaceRootsChange(workspaceRoots.filter((root) => root !== path));
   }
 
-  async function handleResetWorkspace(rootPath: string) {
-    try {
-      const entries = await readDir(rootPath);
-      for (const entry of entries) {
-        if (entry.name === 'node_modules' || entry.name.endsWith('.zip')) {
-          continue;
-        }
-        const fullPath = await join(rootPath, entry.name);
-        await remove(fullPath, { recursive: true });
-      }
-      alert(`Reset workspace ${rootPath} complete.`);
-    } catch (error) {
-      console.error(`Failed to reset workspace ${rootPath}`, error);
-      alert(`Failed to reset workspace ${rootPath}: ${error}`);
-    }
-  }
-
   function handleLanguageChange(lang: string) {
     locale.set(lang);
     localStorage.setItem('language', lang);
@@ -116,14 +96,9 @@
               {#each workspaceRoots as root}
                 <div class="flex items-center justify-between bg-muted/50 p-2 pl-4 rounded-lg border group transition-all hover:border-primary/50">
                   <span class="text-xs font-mono truncate mr-4">{root}</span>
-                  <div class="flex gap-1">
-                    <Button variant="ghost" size="icon" class="h-7 w-7 text-warning opacity-0 group-hover:opacity-100 transition-opacity" onclick={() => handleResetWorkspace(root)} title="Reset (Delete all except .zip and node_modules)">
-                      <RefreshCw class="h-3.5 w-3.5" />
-                    </Button>
-                    <Button variant="ghost" size="icon" class="h-7 w-7 text-destructive opacity-0 group-hover:opacity-100 transition-opacity" onclick={() => handleRemoveWorkspace(root)} title="Remove workspace">
-                      <Trash2 class="h-3.5 w-3.5" />
-                    </Button>
-                  </div>
+                  <Button variant="ghost" size="icon" class="h-7 w-7 text-destructive opacity-0 group-hover:opacity-100 transition-opacity" onclick={() => handleRemoveWorkspace(root)}>
+                    <Trash2 class="h-3.5 w-3.5" />
+                  </Button>
                 </div>
               {/each}
               {#if workspaceRoots.length === 0}

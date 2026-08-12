@@ -22,6 +22,7 @@
     FileArchive,
     Trash2
   } from 'lucide-svelte';
+  import { join } from '@tauri-apps/api/path';
   import type { Project } from '../types';
   import { runCommand, runCustomCommand, stopCommand, runningProcesses, runningCommands, logs, appendLog } from '../stores/commands';
   import LogViewer from './LogViewer.svelte';
@@ -48,6 +49,26 @@
     const cmd = project.packageManager;
     const args = cmd === 'yarn' ? [] : ['install'];
     runCommand(project.id, project.path, cmd, args);
+  }
+
+  async function handleResetProject() {
+    if (!project.path) return;
+    try {
+      const entries = await readDir(project.path);
+      for (const entry of entries) {
+        if (!entry.name) continue;
+        if (entry.name === 'node_modules' || entry.name.endsWith('.zip')) {
+          continue;
+        }
+        const fullPath = await join(project.path, entry.name);
+        await remove(fullPath, { recursive: true });
+      }
+      alert(`Reset project ${project.name} complete.`);
+      onRefresh(); // Trigger a refresh of the workspace to reflect the changes
+    } catch (error) {
+      console.error(`Failed to reset project ${project.name}`, error);
+      alert(`Failed to reset project ${project.name}: ${error}`);
+    }
   }
 
   function handleRunScript(scriptName: string) {
@@ -247,6 +268,10 @@
       <Button size="sm" class="h-7 px-2 gap-1.5 text-xs" disabled={isRunning} onclick={handleInstall}>
         <Download class="h-3 w-3" />
         {$_('install')}
+      </Button>
+      <Button variant="outline" size="sm" class="h-7 px-2 gap-1.5 text-xs text-warning border-warning/30 hover:bg-warning/10" disabled={isRunning} onclick={handleResetProject} title="Reset (Delete all except .zip and node_modules)">
+        <RefreshCw class="h-3 w-3" />
+        Reset
       </Button>
     </div>
 
