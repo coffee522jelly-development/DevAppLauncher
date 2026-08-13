@@ -216,14 +216,18 @@
         const subEntries = await readDir(extractFolderPath);
 
         // Move all items to project.path
+        let allMoved = true;
         for (const sub of subEntries) {
           if (!sub.name) continue;
           const oldPath = await join(extractFolderPath, sub.name);
           const newPath = await join(project.path, sub.name);
 
           try {
+            // Attempt to remove existing file/directory at destination before renaming to avoid errors
+            await remove(newPath, { recursive: true }).catch(() => {});
             await rename(oldPath, newPath);
           } catch (renameErr: any) {
+             allMoved = false;
              appendLog(project.id, {
               type: 'stderr',
               content: `Failed to move ${sub.name}: ${renameErr.message || renameErr}`,
@@ -233,12 +237,20 @@
         }
 
         // Delete the now empty folder
-        await remove(extractFolderPath, { recursive: true });
-        appendLog(project.id, {
-          type: 'info',
-          content: `Successfully flattened extracted folder: ${extractFolderName}`,
-          timestamp: new Date().toLocaleTimeString()
-        });
+        if (allMoved) {
+          await remove(extractFolderPath, { recursive: true });
+          appendLog(project.id, {
+            type: 'info',
+            content: `Successfully flattened extracted folder: ${extractFolderName}`,
+            timestamp: new Date().toLocaleTimeString()
+          });
+        } else {
+          appendLog(project.id, {
+            type: 'stderr',
+            content: `Could not fully flatten ${extractFolderName} due to move errors.`,
+            timestamp: new Date().toLocaleTimeString()
+          });
+        }
       }
     } catch (e: any) {
       console.error("Failed to flatten extracted zip", e);
