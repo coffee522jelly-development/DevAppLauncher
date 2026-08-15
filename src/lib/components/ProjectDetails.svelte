@@ -303,7 +303,7 @@
 
 <div class="flex flex-col h-full bg-background text-foreground overflow-hidden">
   <!-- Header -->
-  <header class="px-4 py-3 border-b bg-card shrink-0">
+  <header class="px-4 py-3 border-b bg-card shrink-0 shadow-sm relative z-20">
     <div class="flex items-center justify-between">
       <div class="flex items-center gap-3 min-w-0">
         <h1 class="text-lg font-bold tracking-tight truncate">{project.name}</h1>
