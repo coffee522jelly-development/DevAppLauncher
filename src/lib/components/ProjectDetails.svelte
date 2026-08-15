@@ -262,6 +262,7 @@
     }
 
     scanForZips();
+    onRefresh();
   }
 
   async function handleDeleteZip(zipName: string) {
