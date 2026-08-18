@@ -23,7 +23,7 @@
 </script>
 
 <aside class="w-52 border-r bg-card text-card-foreground flex flex-col h-full shadow-sm z-10">
-  <div class="px-3 py-2 flex justify-between items-center h-10 border-b">
+  <div class="px-3 py-2 flex justify-between items-center h-10 border-b shadow-sm relative z-20">
     <h2 class="font-bold text-[10px] tracking-widest text-muted-foreground uppercase">{$_('projects')}</h2>
     <Button variant="ghost" size="icon" class="h-6 w-6" onclick={onRefresh} disabled={isScanning}>
       <RefreshCw class={cn("h-3 w-3", isScanning && "animate-spin")} />

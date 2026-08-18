@@ -32,6 +32,21 @@ body {
   @apply antialiased font-sans bg-background text-foreground;
 }
 
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  @apply bg-muted-foreground/30 rounded-full;
+}
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-muted-foreground/50;
+}
+
 /* shadcn-svelte animations */
 @keyframes in {
   from { opacity: 0; }

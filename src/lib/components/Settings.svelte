@@ -1,6 +1,7 @@
 <script lang="ts">
   import { _, locale } from 'svelte-i18n';
   import { open } from '@tauri-apps/plugin-dialog';
+  import { openUrl } from '@tauri-apps/plugin-opener';
   import {
     X,
     Plus,
@@ -12,7 +13,8 @@
     Key,
     LayoutGrid,
     Check,
-    GitBranch
+    GitBranch,
+    Link
   } from 'lucide-svelte';
   import { Button } from './ui/button';
   import { Input } from './ui/input';
@@ -177,6 +179,24 @@
                   <option value={theme}>{theme.charAt(0).toUpperCase() + theme.slice(1)}</option>
                 {/each}
               </select>
+            </div>
+          </section>
+
+          <Separator />
+
+          <!-- Links Section -->
+          <section class="space-y-4">
+            <div class="flex items-center gap-2 text-primary font-bold">
+              <Link class="h-4 w-4" />
+              <h3 class="text-sm uppercase tracking-wider">Environment Setup</h3>
+            </div>
+            <div class="flex gap-4">
+              <Button variant="outline" class="flex-1" onclick={() => openUrl('https://nodejs.org/en/download')}>
+                Install Node.js
+              </Button>
+              <Button variant="outline" class="flex-1" onclick={() => openUrl('https://rust-lang.org/tools/install/')}>
+                Install Rust
+              </Button>
             </div>
           </section>
         </div>
