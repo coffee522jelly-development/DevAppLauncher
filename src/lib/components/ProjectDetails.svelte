@@ -32,11 +32,13 @@
   import { Separator } from './ui/separator';
   import { Card, CardContent, CardHeader } from './ui/card';
 
-  let { project, gitServerUrl = '', gitUsername = '', gitToken = '', onRefresh }: {
+  let { project, gitServerUrl = '', gitUsername = '', gitToken = '', errorColor, infoColor, onRefresh }: {
     project: Project,
     gitServerUrl?: string,
     gitUsername?: string,
     gitToken?: string,
+    errorColor?: string,
+    infoColor?: string,
     onRefresh: () => void
   } = $props();
 
@@ -443,7 +445,7 @@
       </div>
     {/if}
 
-    <LogViewer {projectLogs} />
+    <LogViewer {projectLogs} {errorColor} {infoColor} />
   </div>
 
   <!-- Footer / Custom Command -->

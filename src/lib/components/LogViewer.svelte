@@ -4,7 +4,7 @@
   import type { CommandLog } from '../types';
   import { cn } from '$lib/utils';
 
-  let { projectLogs }: { projectLogs: CommandLog[] } = $props();
+  let { projectLogs, errorColor = '#fb7185', infoColor = '#38bdf8' }: { projectLogs: CommandLog[], errorColor?: string, infoColor?: string } = $props();
 
   let scrollViewport = $state<HTMLElement>();
 
@@ -37,10 +37,11 @@
 
             <div class={cn(
               "whitespace-pre-wrap break-all flex-1",
-              log.type === 'stderr' ? "text-rose-400" :
-              log.type === 'info' ? "text-sky-400 font-bold" :
-              "text-zinc-300"
-            )}>
+              log.type === 'info' ? "font-bold" : "",
+              log.type !== 'stderr' && log.type !== 'info' ? "text-zinc-300" : ""
+            )}
+            style={log.type === 'stderr' ? `color: ${errorColor}` : log.type === 'info' ? `color: ${infoColor}` : ''}
+            >
               {#if log.type === 'info' && log.content.startsWith('$')}
                 <span class="text-zinc-500 mr-2 opacity-50">❯</span>
               {/if}

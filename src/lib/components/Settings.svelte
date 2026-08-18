@@ -29,11 +29,15 @@
     gitUsername = '',
     gitToken = '',
     currentTheme = 'night',
+    errorColor = '#fb7185',
+    infoColor = '#38bdf8',
     onWorkspaceRootsChange,
     onGitServerUrlChange,
     onGitUsernameChange,
     onGitTokenChange,
     onThemeChange,
+    onErrorColorChange,
+    onInfoColorChange,
     onClose
   }: {
     workspaceRoots?: string[],
@@ -41,11 +45,15 @@
     gitUsername?: string,
     gitToken?: string,
     currentTheme?: string,
+    errorColor?: string,
+    infoColor?: string,
     onWorkspaceRootsChange: (roots: string[]) => void,
     onGitServerUrlChange: (url: string) => void,
     onGitUsernameChange: (user: string) => void,
     onGitTokenChange: (token: string) => void,
     onThemeChange: (theme: string) => void,
+    onErrorColorChange: (color: string) => void,
+    onInfoColorChange: (color: string) => void,
     onClose: () => void
   } = $props();
 
@@ -179,6 +187,32 @@
                   <option value={theme}>{theme.charAt(0).toUpperCase() + theme.slice(1)}</option>
                 {/each}
               </select>
+            </div>
+          </section>
+
+          <Separator />
+
+          <!-- Console Colors Section -->
+          <section class="space-y-4">
+            <div class="flex items-center gap-2 text-primary font-bold">
+              <Palette class="h-4 w-4" />
+              <h3 class="text-sm uppercase tracking-wider">Console Colors</h3>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+              <div class="grid gap-2">
+                <Label for="error-color" class="opacity-70">Error Text Color</Label>
+                <div class="flex items-center gap-2">
+                  <Input id="error-color" type="color" class="h-9 w-12 p-1 cursor-pointer" value={errorColor} oninput={(e: any) => onErrorColorChange(e.currentTarget.value)} />
+                  <Input class="h-9 font-mono text-xs" value={errorColor} oninput={(e: any) => onErrorColorChange(e.currentTarget.value)} />
+                </div>
+              </div>
+              <div class="grid gap-2">
+                <Label for="info-color" class="opacity-70">Info/Warning Text Color</Label>
+                <div class="flex items-center gap-2">
+                  <Input id="info-color" type="color" class="h-9 w-12 p-1 cursor-pointer" value={infoColor} oninput={(e: any) => onInfoColorChange(e.currentTarget.value)} />
+                  <Input class="h-9 font-mono text-xs" value={infoColor} oninput={(e: any) => onInfoColorChange(e.currentTarget.value)} />
+                </div>
+              </div>
             </div>
           </section>
 

@@ -14,6 +14,8 @@
   let gitUsername: string = $state(localStorage.getItem('gitUsername') || '');
   let gitToken: string = $state(localStorage.getItem('gitToken') || '');
   let currentTheme: string = $state(localStorage.getItem('theme') || 'night');
+  let errorColor: string = $state(localStorage.getItem('errorColor') || '#fb7185');
+  let infoColor: string = $state(localStorage.getItem('infoColor') || '#38bdf8');
   let projects: Project[] = $state([]);
   let selectedProjectId: string | undefined = $state(localStorage.getItem('selectedProjectId') || undefined);
   let showSettings = $state(false);
@@ -79,6 +81,8 @@
     localStorage.setItem('gitUsername', gitUsername);
     localStorage.setItem('gitToken', gitToken);
     localStorage.setItem('theme', currentTheme);
+    localStorage.setItem('errorColor', errorColor);
+    localStorage.setItem('infoColor', infoColor);
     if (selectedProjectId) {
       localStorage.setItem('selectedProjectId', selectedProjectId);
     }
@@ -147,6 +151,8 @@
             {gitServerUrl}
             {gitUsername}
             {gitToken}
+            {errorColor}
+            {infoColor}
             onRefresh={handleRefresh}
           />
         {:else}
@@ -170,11 +176,15 @@
         {gitUsername}
         {gitToken}
         {currentTheme}
+        {errorColor}
+        {infoColor}
         onWorkspaceRootsChange={(roots) => workspaceRoots = roots}
         onGitServerUrlChange={(url) => gitServerUrl = url}
         onGitUsernameChange={(user) => gitUsername = user}
         onGitTokenChange={(token) => gitToken = token}
         onThemeChange={(theme) => currentTheme = theme}
+        onErrorColorChange={(color) => errorColor = color}
+        onInfoColorChange={(color) => infoColor = color}
         onClose={() => showSettings = false}
       />
     {/if}
